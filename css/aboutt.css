@@ -1,0 +1,769 @@
+/* Reset and General Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Roboto", sans-serif;
+}
+
+body {
+  background-image: url("blur.jpg"); /* Replace with your image URL */
+  background-size: cover; /* Ensures the background covers the whole element */
+  background-position: center;
+  font-family: "Roboto", sans-serif;
+  margin: auto 0;
+  padding: auto 0;
+}
+
+/* Title Section */
+.Title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0);
+  border-radius: 10px;
+  height: 350px;
+  width: 1300px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+.text-content h2 {
+  font-size: 2.5em;
+  color: crimson;
+  margin-bottom: 20px;
+  font-size: 50px;
+}
+
+.text-content p {
+  color: white;
+  font-size: 1.2em;
+  font-size: 50px;
+}
+
+.Title img {
+  max-width: 300px;
+  height: auto;
+}
+.rotating-image img {
+  width: 200px; /* Adjust the size of the image */
+  height: 200px;
+  border-radius: 10px;
+  animation: rotate 5s linear infinite; /* Rotate over 5 seconds, infinitely */
+}
+
+/* Define the rotation animation */
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg); /* Start from 0 degrees */
+  }
+  100% {
+    transform: rotate(360deg); /* Rotate to 360 degrees */
+  }
+}
+
+/* Main Sections */
+.main {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+  font-family: "Roboto", sans-serif;
+}
+
+.main-item {
+  padding: 20px;
+  background-color: rgba(240, 240, 240, 0);
+  border-radius: 10px;
+  text-align: center;
+  width: 1000px;
+}
+
+.main-item h2 {
+  font-size: 2em;
+  color: crimson;
+  font-size: 50px;
+}
+.main-item p {
+  color: rgb(11, 11, 11);
+}
+
+.w {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.w h2 {
+  color: crimson;
+  font-size: 40px;
+}
+
+/* Menu Section */
+.menu {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  margin: 30px auto;
+  margin-bottom: 5%;
+}
+
+.menu-item {
+  text-align: center;
+  width: 300px;
+}
+
+.menu-item img {
+  width: auto;
+  height: 150px;
+
+  border-style: solid;
+  border-color: gray;
+}
+
+.menu-item h2 {
+  font-size: 1.2em;
+  margin: 10px 0;
+  color: white;
+}
+
+/* Scholarship Section */
+.scholarship-section {
+  padding: 30px 0;
+  background-color: white;
+}
+
+.scholarship-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 200px;
+  padding: 0;
+}
+
+.scholarship-image img {
+  display: flex;
+  width: 600px;
+  margin-top: 50px;
+}
+
+.scholarship-container1 {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 200px;
+  padding: 0;
+}
+.scholarship-image1 img {
+  width: 300px;
+  margin-top: 50px;
+  margin-left: 100px;
+}
+
+.scholarship-content {
+  flex: 1;
+}
+
+.scholarship-header h2 {
+  color: crimson;
+  font-size: 1.8em;
+}
+
+.scholarship-apply-button button {
+  background-color: crimson;
+  color: white;
+  padding: 10px 20px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.scholarship-apply-button button:hover {
+  background-color: rgba(105, 102, 102, 0.74);
+}
+
+/* Footer Section */
+footer {
+  background-color: #4e4545c5;
+  padding: 20px;
+}
+
+.footer-content {
+  display: flex;
+  align-items: center; /* Aligns the logo and text vertically */
+}
+
+.logo {
+  margin-left: 200px;
+  width: 60px; /* Adjust the size of the logo */
+  height: 60px;
+  margin-right: 20px;
+  border-radius: 100%; /* Space between logo and text */
+}
+.logo1 {
+  margin-left: 100px;
+  width: 70px; /* Adjust the size of the logo */
+  height: 70px;
+  margin-right: 20px;
+  /* Space between logo and text */
+}
+.logo2 {
+  margin-left: 350px;
+  width: 60px; /* Adjust the size of the logo */
+  height: 60px;
+  margin-right: 20px;
+  border-radius: 100%; /* Space between logo and text */
+}
+.logo3 {
+  margin-left: 350px;
+  width: 30px; /* Adjust the size of the logo */
+  height: 30px;
+  margin-right: 20px;
+  /* Space between logo and text */
+}
+
+.logo4 {
+  margin-left: 225px;
+  width: 30px; /* Adjust the size of the logo */
+  height: 30px;
+  margin-right: 20px;
+  /* Space between logo and text */
+}
+.text-content h3 {
+  color: white;
+}
+.text-content p {
+  margin: 0;
+  color: white;
+}
+.text-content1 {
+  color: white;
+  margin-bottom: 10px;
+}
+.text-content1 p {
+  margin-top: 10px;
+}
+.space {
+  padding: 20px;
+}
+.h1 {
+  margin-top: 20px;
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+  font-size: 30px;
+  gap: 10px;
+  border-top: 2px solid rgb(243, 240, 240);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding: 10px 0;
+  background-color: #4e454570;
+  border-top: 2px solid rgb(243, 240, 240);
+  border-bottom: 2px solid rgb(243, 240, 240);
+}
+
+.footer-bottom p {
+  padding-top: 20px;
+  margin: 0;
+  color: white;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .scholarship-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .scholarship-image img {
+    width: 800px;
+    margin-bottom: auto;
+  }
+
+  .menu {
+    flex-direction: column;
+  }
+}
+/* Admin Scholarship Section */
+.admin-scholarship .scholarship-header h2 {
+  color: crimson;
+  font-weight: bold;
+  font-size: 30px;
+}
+
+.admin-scholarship .scholarship-header p {
+  color: gray;
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+.admin-scholarship .scholarship-qualifications h3,
+.admin-scholarship .scholarship-requirements h3,
+.admin-scholarship .scholarship-discounts h3 {
+  font-weight: bold;
+}
+
+.admin-scholarship .scholarship-content ul {
+  list-style: none;
+  padding: 3;
+}
+
+.admin-scholarship .scholarship-content li {
+  padding: 8px 0;
+  font-size: 15px;
+  color: rgb(0, 0, 0);
+}
+
+.admin-scholarship .scholarship-apply-button button {
+  background-color: crimson;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.admin-scholarship .scholarship-apply-button button:hover {
+  background-color: rgba(128, 124, 124, 0.882);
+}
+
+/* Ensure it's responsive */
+@media (max-width: 768px) {
+  .admin-scholarship .scholarship-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .admin-scholarship .scholarship-image img {
+    width: 250px;
+    margin-bottom: 20px;
+  }
+
+  .admin-scholarship .scholarship-content {
+    max-width: 100%;
+  }
+
+  .admin-scholarship .scholarship-apply-button button {
+    width: 100%;
+  }
+}
+body {
+  /*background-image: url("school.png"); /* Replace with the correct path */
+  background-size: cover; /* Makes the image cover the entire page */
+  background-position: center; /* Centers the image */
+  background-attachment: fixed; /* Ensures the image stays fixed when scrolling */
+  background-repeat: no-repeat; /* Prevents the image from repeating */
+}
+.scholarship-box {
+  background-color: crimson;
+  padding: 30px;
+  border-radius: 10px; /* Rounded corners */
+  text-align: center;
+  margin-top: 30px;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scholarship-header5 {
+  color: white; /* White text to contrast with the red background */
+  font-size: 50px;
+  font-weight: bold;
+}
+.scholarship-logo {
+  width: 70px; /* Adjust the size of the logo */
+  height: auto;
+  border-radius: 0%; /* Optional: makes the logo round */
+}
+
+.scholarship-text {
+  text-align: center;
+}
+.scholarship-tagline {
+  color: white; /* White text for the tagline */
+  font-size: 16px;
+  margin-top: 5px;
+  font-style: italic; /* Optional: makes the tagline italic */
+}
+.scholarship-content1 {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Space between the logo and the text */
+}
+
+/* css to non academic
+  
+  /* New Scholarship Section */
+.new-scholarship .scholarship-header h2 {
+  color: navy;
+  font-weight: bold;
+  font-size: 32px;
+}
+
+.new-scholarship .scholarship-header p {
+  color: gray;
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+.new-scholarship .scholarship-qualifications h3,
+.new-scholarship .scholarship-requirements h3,
+.new-scholarship .scholarship-discounts h3 {
+  font-weight: bold;
+}
+
+.new-scholarship .scholarship-content ul {
+  list-style: none;
+  padding: 0;
+  color: navy;
+}
+
+.new-scholarship .scholarship-content li {
+  padding: 5px 0;
+  font-size: 15px;
+  color: rgb(0, 0, 0);
+}
+
+.new-scholarship .scholarship-apply-button button {
+  background-color: crimson;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.new-scholarship .scholarship-apply-button button:hover {
+  background-color: rgba(128, 124, 124, 0.882);
+}
+
+/* Flexbox Layout to ensure image stays on the right */
+.new-scholarship .scholarship-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.new-scholarship .scholarship-image img {
+  width: 400px;
+  border-radius: 10px;
+}
+
+.new-scholarship .scholarship-content {
+  max-width: 600px;
+}
+
+/* Ensure it's responsive */
+@media (max-width: 768px) {
+  .new-scholarship .scholarship-container {
+    flex-direction: column-reverse;
+    text-align: center;
+  }
+
+  .new-scholarship .nonacademic-image img {
+    width: 100px; /* Set the width of the image (adjust this value as needed) */
+    height: auto; /* Maintain the aspect ratio of the image */
+    margin-bottom: 20px; /* Add some space below the image */
+  }
+
+  .new-scholarship .scholarship-content {
+    max-width: 100%;
+  }
+
+  .new-scholarship .scholarship-apply-button button {
+    width: 100%;
+  }
+}
+/* Style for the entire section */
+.testimonial-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 0;
+  background-color: #f5f5f5;
+  min-height: 50vh; /* Sets the minimum height of the section */
+}
+
+/* Style for the entire section */
+.testimonial-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 0;
+  background-color: #ffffff;
+  min-height: 50vh; /* Sets the minimum height of the section */
+}
+
+/* Container for the testimonial */
+.testimonial-container {
+  width: 80%; /* Set the width of the container */
+  max-width: 1200px; /* Optional: max width for larger screens */
+  height: 400px; /* Rectangular height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1); /* Optional shadow */
+}
+
+/* Testimonial item (image and text) */
+.testimonial-item {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* The image style */
+.testimonial-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the container */
+  transition: transform 0.3s ease;
+}
+
+/* Hover effect on the image */
+.testimonial-item:hover img {
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+/* Text content that appears on hover */
+.testimonial-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  opacity: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease;
+  text-align: center;
+  padding: 20px;
+}
+
+.testimonial-item:hover .testimonial-text {
+  opacity: 1; /* Text appears on hover */
+}
+
+.testimonial-text h3 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+}
+
+.testimonial-text p {
+  font-size: 1.5em;
+}
+
+/* Footer Container Styling */
+.footer-container {
+  background-color: #ffffff42; /* Gray background similar to the image */
+  color: rgb(0, 0, 0);
+  padding: 30px 0;
+  text-align: center;
+  font-family: "Arial", sans-serif;
+}
+
+/* Footer Top Section */
+.footer-top {
+  display: flex;
+  justify-content: space-around;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #96969642;
+}
+
+.footer-logo img {
+  max-width: 120px; /* Adjust size of logo images */
+  margin-bottom: 10px;
+}
+
+.footer-logo p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Footer Contact Section */
+.footer-contact h3 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  margin-left: 300px;
+}
+
+.footer-contact p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.footer-contact i {
+  margin-right: 8px;
+}
+
+/* Footer Bottom Section */
+.footer-bottom {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #ccc;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-top {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-logo {
+    margin-bottom: 20px;
+  }
+  /* Header and Navigation */
+}
+
+header {
+  display: flex;
+  align-items: center;
+  background-color: crimson; /* Reduced opacity */
+
+  margin: auto 0;
+}
+header h3 {
+  margin-left: 100px;
+}
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 30px;
+  margin-left: 50px;
+}
+
+nav ul li {
+  padding: 20px;
+  cursor: pointer;
+  color: hsl(0, 23%, 95%);
+  font-size: 2 em;
+}
+
+.nav a {
+  text-decoration: underline; /* Keep underline */
+  text-decoration-color: transparent; /* Remove underline color */
+  color: #00000000; /* Set text color */
+}
+.logo-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.text-content {
+  text-align: center;
+  max-width: 700px;
+}
+
+.text-content h2 {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.text-content p {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.logo-left,
+.logo-right {
+  width: 200px; /* Adjust the width based on your logo size */
+  height: auto;
+  margin: 0 20px;
+}
+
+/* Make the layout responsive */
+@media (max-width: 768px) {
+  .Title {
+    flex-direction: column;
+  }
+
+  .logo-container {
+    flex-direction: column;
+  }
+
+  .logo-left,
+  .logo-right {
+    margin: 10px 0;
+    width: 80px; /* Reduce logo size on smaller screens */
+  }
+
+  .text-content {
+    max-width: 100%;
+  }
+}
+.error {
+  background-color: #f8d7da; /* Light red background */
+  color: #721c24; /* Dark red text */
+  border: 1px solid #f5c6cb; /* Slightly darker border */
+  padding: 10px; /* Padding around the text */
+  margin: 15px 0; /* Space above and below the error message */
+  border-radius: 5px; /* Rounded corners */
+  font-weight: bold; /* Bold text */
+  text-align: center; /* Center the text */
+}
+
+.slider {
+  width: 100%;
+  max-width: 1600px; /* Adjust based on your needs */
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.slides {
+  display: flex;
+  transition: transform 100.9s ease-in-out;
+}
+
+.slide {
+  min-width: 100%;
+  transition: opacity 100.9s ease-in-out;
+}
+
+.slide img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Automatic sliding */
+@keyframes slide-animation {
+  0% {
+    transform: translateX(0);
+  }
+  33% {
+    transform: translateX(-100%);
+  }
+  66% {
+    transform: translateX(-200%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.slides {
+  animation: slide-animation 30s infinite;
+}

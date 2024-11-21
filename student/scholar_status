@@ -1,0 +1,73 @@
+<?php
+// scholar_status.php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Debugging: Print current file path and request details
+file_put_contents('debug_log.txt', 
+    "File Path: " . __FILE__ . "\n" .
+    "Request Method: " . $_SERVER['REQUEST_METHOD'] . "\n" .
+    "POST Data: " . print_r($_POST, true) . "\n" .
+    "Server Script Name: " . $_SERVER['SCRIPT_NAME'] . "\n" .
+    "Request URI: " . $_SERVER['REQUEST_URI'] . "\n",
+    FILE_APPEND
+);
+
+// Include database connection
+require_once '../includes/db.php';  // Adjust path as needed
+
+header('Content-Type: application/json');
+header('Access-Control-Allow-Origin: *');  // For debugging AJAX
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Validate request
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Invalid request method',
+        'method' => $_SERVER['REQUEST_METHOD']
+    ]);
+    exit;
+}
+
+// Ensure scholarship_id is provided
+if (!isset($_POST['scholarship_id'])) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'No scholarship ID provided',
+        'post_data' => $_POST
+    ]);
+    exit;
+}
+
+try {
+    $scholarship_id = intval($_POST['scholarship_id']);
+
+    // Prepare and execute query
+    $stmt = $conn->prepare("SELECT id, scholarship_name, status, type FROM scholarships WHERE id = ?");
+    $stmt->bind_param("i", $scholarship_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $scholarship = $result->fetch_assoc();
+        
+        echo json_encode([
+            'status' => $scholarship['status'],
+            'type' => $scholarship['type'],
+            'name' => $scholarship['scholarship_name']
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'closed',
+            'message' => 'Scholarship not found'
+        ]);
+    }
+} catch (Exception $e) {
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Exception: ' . $e->getMessage()
+    ]);
+}
+?>

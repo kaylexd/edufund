@@ -1,0 +1,384 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-image: url("img/blur.jpg"); /* Replace with your image URL */
+  background-size: cover; /* Makes the image cover the entire box */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; /* Prevents the image from repeating */
+  font-family: "Roboto", sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  background-color: crimson; /* Reduced opacity */
+  max-width: 2000;
+  font-family: Arial, Helvetica, sans-serif;
+}
+header h1 {
+  margin-left: 100px;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 50px;
+  margin-left: 150px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+nav ul li {
+  padding: 20px;
+  cursor: pointer;
+  color: hsl(0, 23%, 95%);
+  font-size: 2 em;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.subheader {
+  font-family: Arial, Helvetica, sans-serif;
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #efeeee98;
+  margin-left: 450px;
+  width: 600px;
+}
+
+.logo9 {
+  width: 50px;
+  height: 50px;
+  margin-left: 10px;
+}
+
+.content {
+  flex: 1;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  color: rgb(9, 9, 9);
+  margin-left: 55px;
+  animation: fadeIn 2s ease-in-out;
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.description {
+  font-size: 16px;
+  color: rgb(19, 14, 14);
+  margin: 5px 0 0;
+  margin-left: 55px;
+}
+
+.accordion-section {
+  border: 1px solid crimson;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  margin-left: 450px;
+  width: 600px;
+}
+
+.accordion-header {
+  background-color: crimson;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: bolder;
+  text-align: center;
+  font-size: large;
+  color: white;
+}
+.accordion-header p {
+  color: white;
+  font-size: small;
+}
+.accordion-header:hover {
+  transition: background-color 0.5s, transform 0.5s; /* Change duration */
+  color: #333; /* Change text color */
+  text-decoration: underline; /* Underline text */
+}
+
+.accordion-content {
+  padding: 10px;
+  display: none; /* Hide content by default */
+  background-color: #fafafa;
+  text-align: left;
+}
+.accordion-content p {
+  font-size: 12px;
+  text-align: left;
+  padding: 5px;
+  color: rgb(24, 22, 22);
+
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+.accordion-content ul {
+  font-size: 12pxs;
+  text-align: left;
+  padding: 5px;
+  color: rgb(247, 7, 7);
+  text-align: left;
+  font-size: 15px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.accordion-content li {
+  font-size: 12px;
+  text-align: left;
+  padding: 5px;
+  color: rgb(24, 22, 22);
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-size: 15px;
+  font-style: italic;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #fb020200;
+  color: rgb(219, 223, 231);
+  border: none;
+  cursor: pointer;
+  font-weight: bolder;
+  font-style: italic;
+  margin-left: 40%;
+}
+button:hover {
+  background-color: #ffffff00;
+}
+
+footer {
+  background-color: #4e4545c5;
+  padding: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.footer-content {
+  display: flex;
+  align-items: center; /* Aligns the logo and text vertically */
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.logo {
+  margin-left: 255px;
+  width: 60px; /* Adjust the size of the logo */
+  height: 60px;
+  margin-right: 20px;
+  border-radius: 100%; /* Space between logo and text */
+  margin-top: 10px;
+}
+.logo1 {
+  margin-left: 100px;
+  width: 70px; /* Adjust the size of the logo */
+  height: 70px;
+  margin-right: 20px;
+  margin-top: 10px;
+  /* Space between logo and text */
+}
+.logo2 {
+  margin-left: 350px;
+  width: 60px; /* Adjust the size of the logo */
+  height: 60px;
+  margin-right: 20px;
+  border-radius: 100%; /* Space between logo and text */
+}
+.logo3 {
+  margin-left: 350px;
+  width: 30px; /* Adjust the size of the logo */
+  height: 30px;
+  margin-right: 20px;
+  /* Space between logo and text */
+}
+
+.logo4 {
+  margin-left: 225px;
+  width: 30px; /* Adjust the size of the logo */
+  height: 30px;
+  margin-right: 20px;
+  /* Space between logo and text */
+}
+.text-content h3 {
+  color: white;
+}
+.text-content p {
+  margin: 0;
+  color: white;
+}
+.text-content1 {
+  color: white;
+  margin-bottom: 10px;
+}
+.text-content1 p {
+  margin-top: 10px;
+}
+.space {
+  padding: 20px;
+}
+.h1 {
+  margin-top: 20px;
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+  font-size: 30px;
+  gap: 10px;
+  border-top: 2px solid rgb(243, 240, 240);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding: 10px 0;
+  background-color: #4e454570;
+  border-top: 2px solid rgb(243, 240, 240);
+  border-bottom: 2px solid rgb(243, 240, 240);
+}
+
+.footer-bottom p {
+  padding: 20px;
+  margin: 0;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
