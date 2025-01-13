@@ -3,14 +3,14 @@ session_start();
 include('../includes/db.php');
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../login.php"); // Redirect to login if not logged in
+    header("Location: ../login.php");
     exit();
 }
 
 $id = $_SESSION['user_id'];
 
 // Fetch student data
-$query = "SELECT sfname, smname, slname, semail, s_pass FROM students WHERE id = ?";
+$query = "SELECT sfname, smname, slname, semail, spass FROM students WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -22,7 +22,7 @@ $sfname = isset($row['sfname']) ? $row['sfname'] : '';
 $smname = isset($row['smname']) ? $row['smname'] : '';
 $slname = isset($row['slname']) ? $row['slname'] : '';
 $semail = isset($row['semail']) ? $row['semail'] : '';
-$s_pass = isset($row['s_pass']) ? $row['s_pass'] : '';
+$s_pass = isset($row['spass']) ? $row['spass'] : '';
 
 // In the notifications dropdown
 $sql = "SELECT * FROM announcements WHERE student_id = ? AND is_read = 0 ORDER BY created_at DESC";
@@ -32,12 +32,7 @@ $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $result = $stmt->get_result();
 
-while($row = $result->fetch_assoc()) {
-    echo "<div class='dropdown-item'>";
-    echo htmlspecialchars($row['message']);
-    echo "<div class='small text-gray-500'>" . $row['created_at'] . "</div>";
-    echo "</div>";
-}
+
 
 $sql = "SELECT COUNT(*) as count FROM announcements WHERE student_id = ? AND is_read = 0";
 $stmt = $conn->prepare($sql);
@@ -95,12 +90,57 @@ $count = $result->fetch_assoc()['count'];
 <body id="page-top">
 
   <!-- Page Wrapper -->
+   
+  <?php
+$announcement_query = "SELECT message FROM announcements ORDER BY created_at DESC LIMIT 1";
+$announcement_result = $conn->query($announcement_query);
+$announcement_text = "No announcement at the moment";
+if ($announcement_result->num_rows > 0) {
+    $announcement_text = $announcement_result->fetch_assoc()['message'];
+}
+?>
+
+<style>
+@keyframes scroll-left {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+.marquee-container {
+    overflow: hidden;
+    background-color: #f8f9fc;
+    padding: 8px 0;
+    width: 100%;
+}
+.marquee-text {
+    display: inline-block;
+    animation: scroll-left 25s linear infinite;
+    white-space: nowrap;
+}
+</style>
+
+<div class="marquee-container">
+    <div class="marquee-text">
+    <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+    </div>
+</div>
+
+
+
+
+
+
   <div id="wrapper">
 
 
   
    <!-- Sidebar -->
-   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+   <ul class="navbar-nav bg-gray-700 sidebar sidebar-dark accordion" id="accordionSidebar">
 
 
 
@@ -131,7 +171,7 @@ $count = $result->fetch_assoc()['count'];
 
 <li class="nav-item">
   <a class="nav-link" href="profile.php">
-  <i class="fa-solid fa-magnifying-glass"></i>
+  <i class="fa-solid fa-user"></i>
     <span>Profile</span></a>
 </li>
 <!-- Heading 
@@ -152,7 +192,7 @@ $count = $result->fetch_assoc()['count'];
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="navbar navbar-expand navbar-dark navbar-crimson topbar mb-4 static-top shadow">
 
           
 
@@ -165,7 +205,8 @@ $count = $result->fetch_assoc()['count'];
           <li class="nav-item dropdown no-arrow mx-1">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fas fa-bell fa-fw"></i>
+                <i class="fas fa-bell fa-fw text-white"></i>
+
                   <!-- Counter - Alerts -->
                   <span class="badge badge-danger badge-counter"><?php echo $count; ?></span>
               </a>
@@ -201,7 +242,7 @@ $count = $result->fetch_assoc()['count'];
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <span class="mr-2 d-none d-lg-inline text-white small">
                 <?php echo htmlspecialchars($semail); ?> 
                 </span>
                 <img class="img-profile rounded-circle" src="../img/user-solid.svg">
@@ -234,7 +275,11 @@ $count = $result->fetch_assoc()['count'];
 $user_id = $_SESSION['user_id'];
 
 
-$sql = "SELECT s_account_status, s_scholar_status, is_scholar FROM students WHERE id = ?";
+$sql = "SELECT sa.s_account_status, ast.s_scholar_status, ast.is_scholar 
+        FROM students s
+        LEFT JOIN scholarship_applications sa ON s.id = sa.student_id
+        LEFT JOIN admin_status ast ON s.id = ast.student_id
+        WHERE s.id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -247,10 +292,12 @@ if ($result->num_rows > 0) {
     
     if ($row['s_scholar_status'] === 'Approved' && $row['is_scholar'] == 1) {
         $display_status = 'Scholarship Approved';
+    } elseif ($row['s_account_status'] === 'Valid') {
+        $display_status = 'Pending';
     } elseif ($row['s_scholar_status'] === 'Rejected') {
         $display_status = 'Rejected';
-    } elseif ($row['s_account_status'] === 'Pending') {
-        $display_status = 'Pending';
+    } elseif ($row['s_account_status'] === 'Invalid') { 
+        $display_status = 'Rejected';
     }
 }
 
@@ -258,24 +305,174 @@ $stmt->close();
 
 ?>
 
-
-  <!-- Individual Scholarship Status Card -->
-  <div class="col-xl-3 col-md-6 mb-4">
-    <div class="card border-left-warning shadow h-100 py-2">
-      <div class="card-body">
-        <div class="row no-gutters align-items-center">
-          <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Your Application Status</div>
-            <div class="h5 mb-0 font-weight-bold text-gray-800 mt-4">
-              <?php echo htmlspecialchars($display_status); ?>
+<div class="container-fluid mt-4">
+<div class="row">
+    <!-- Individual Scholarship Status Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-bg-gray text-uppercase mb-1">Application Status</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800 mt-4">
+                            <?php echo htmlspecialchars($display_status); ?>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  
+    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-bg-gray text-uppercase mb-1">Available Scholarships</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800 mt-4">
+                        <?php 
+                        $sql = "SELECT COUNT(*) as open_count FROM scholarship_status WHERE status = 'Open'";
+                        $result = $conn->query($sql);
+                        $row = $result->fetch_assoc();
+                        echo $row['open_count'] . " Available";
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-bg-gray text-uppercase mb-1">Application Form</div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800 mt-4">
+                    </div>
+                    <div class="mt-2">
+                        <a href="application.php" class="text-primary" style="text-decoration: underline;">View Application Form</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    
+							<!-- Chart Container -->
+<div class="col-xl-8 col-lg-7">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-gray-800">Active Scholarships Distribution</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-area">
+                <canvas id="myAreaChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Area Chart
+var ctx = document.getElementById("myAreaChart");
+var myLineChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ["Academic", "Non-Academic", "Admin Scholar"],
+        datasets: [{
+            label: "Active Scholarships",
+            backgroundColor: [
+                'rgba(78, 115, 223, 0.8)',
+                'rgba(28, 200, 138, 0.8)',
+                'rgba(231, 74, 59, 0.8)'
+            ],
+            data: [
+                <?php
+                $sql = "SELECT 
+                    SUM(CASE WHEN s_scholarship_type = 'Academic' THEN 1 ELSE 0 END) as academic,
+                    SUM(CASE WHEN s_scholarship_type = 'Non-Academic' THEN 1 ELSE 0 END) as nonacademic,
+                    SUM(CASE WHEN s_scholarship_type = 'Admin Scholar' THEN 1 ELSE 0 END) as admin
+                FROM scholarship_applications 
+                WHERE s_account_status = 'Valid'";
+                
+                $result = $conn->query($sql);
+                $row = $result->fetch_assoc();
+                
+                echo $row['academic'] . ", ";
+                echo $row['nonacademic'] . ", ";
+                echo $row['admin'];
+                ?>
+            ]
+        }]
+    },
+    options: {
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                left: 10,
+                right: 25,
+                top: 25,
+                bottom: 0
+            }
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        },
+        legend: {
+            display: false
+        },
+        title: {
+            display: true,
+            text: 'Active Scholarships Distribution'
+        }
+    }
+});
+
+</script>
+
+
+							<!-- Officers Card -->
+<div class="col-xl-4 col-lg-5">
+    <div class="card shadow mb-4">
+        <!-- Card Header -->
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-gray-800">Scholarship Officers</h6>
+        </div>
+        <!-- Card Body -->
+        <div class="card-body">
+            <div class="text-center">
+                <div class="mb-4">
+                    <h5 class="font-weight-bold">Gemini Daguplo</h5>
+                    <div class="text-xs font-weight-bold text-gray-800 text-uppercase mb-1">Scholarship Head</div>
+
+                </div>
+                <div class="mb-4">
+                    <h5 class="font-weight-bold">Gabriel</h5>
+                    <div class="text-xs font-weight-bold text-gray-800 text-uppercase mb-1">Scholarship Secretary</div>
+                </div>
+                <div class="mb-4">
+                    <h5 class="font-weight-bold">James</h5>
+                    <div class="text-xs font-weight-bold text-gray-800 text-uppercase mb-1">Scholarship Marketing Officer</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+</div>
 
 
 

@@ -1,7 +1,7 @@
 <?php
 // Database configuration
 $host = 'localhost';
-$db = 'scholar';
+$db = 'scholarship';
 $user = 'root'; // Update this with your MySQL username
 $pass = '';     // Update this with your MySQL password
 

@@ -56,30 +56,24 @@ $thirdImage = 'img/scc-logo.png'; // Replace with the URL of the third image
 
   </head>
   <body 
->
-<?php
-// Define a condition to hide the Home link
-$show_home_link = false; // Set to false to hide, or true to show
-
-// Navigation menu
-?>  
+> 
 <header>
       
       <nav>
    
         <ul>
           <b></b>
-          <li><h3 ><a href="home.php" class="about-link" style="text-decoration: none; color:white;">College Edufund of St.Cecilia's </a></h3></li>
+          <li><h3 ><a href="home.php" class="about-link" style="text-decoration: none; color:white;">College Scholarship Application System of St.Cecilia's </a></h3></li>
           <li></li>
           <li></li>
-          <li></li>
+          <li><a href="home.php" class="about-link" style="text-decoration: none; color:white;">Home</a></li>
+  
           <li><a href="Aboutus.php" class="register-link"style="text-decoration: none; color:white;">About us</a></li>
           <li><a href="Scholarship.php" class="register-link"style="text-decoration: none; color:white;">Scholarships</a></li>
           <li><a href="register.php" class="register-link"style="text-decoration: none; color:white;">Register</a></li>
           <li><a href="login.php" class="about-link" style="text-decoration: none; color:white;">Login</a></li>
-          <?php if ($show_home_link): ?>
-          <li><a href="home.php" class="about-link" style="text-decoration: none; color:white;">Home</a></li>
-          <?php endif; ?>
+          
+
 
           
 

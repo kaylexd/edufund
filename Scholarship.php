@@ -20,28 +20,24 @@
   <header>
       
       <nav>
-      <?php
-// Define a condition to hide the Home link
-$show_Scholarship_link = false; // Set to false to hide, or true to show
-
-// Navigation menu
-?>
+ 
         <ul>
           <b></b>
-          <li><h3 ><a href="home.php" class="about-link" style="text-decoration: none; color:white;">College Edufund  of St.Cecilia's </a></h3></li>
+          <li><h3 ><a href="home.php" class="about-link" style="text-decoration: none; color:white;">College Scholarship Application System of St.Cecilia's  </a></h3></li>
           <li></li>
-          <li></li>
-          <li></li>
+
+        
           
          
      
           <li><a href="home.php" class="about-link" style="text-decoration: none; color:white;">Home</a></li>
-          <li><a href="Aboutus.php" class="register-link"style="text-decoration: none; color:white;">About us</a></li>
+          <li><a href="Aboutus.php" class="register-link"style="text-decoration: none; color:white;">Aboutus</a></li>
+          <li><a href="Scholarship.php" class="register-link"style="text-decoration: none; color:white;">Scholarships</a></li>
           <li><a href="register.php" class="register-link"style="text-decoration: none; color:white;">Register</a></li>
           <li><a href="login.php" class="about-link" style="text-decoration: none; color:white;">Login</a></li>
-          <?php if ($show_Scholarship_link): ?>
-            <li><a href="Scholarship.php" class="register-link"style="text-decoration: none; color:white;">Scholarships</a></li>
-            <?php endif; ?>
+          
+          <li></li>
+            
           
 
           </div>
@@ -282,6 +278,8 @@ $show_Scholarship_link = false; // Set to false to hide, or true to show
                   <li>50% Dis. on Tuition fee</li>
                   <li>Full scholarship for top-performing students</li>
                 </ul>
+                 <br />
+                 <p><span style="color: red;">Note</span>: To apply wait for further announcement</p>
               </div>
               <div class="scholarship-apply-button">
                 <br />
@@ -315,8 +313,6 @@ $show_Scholarship_link = false; // Set to false to hide, or true to show
               <br />
               <h3>Criteria/Qualifications</h3>
               <br>
-              <li style="color:red">To qualify for the CHED Tertiary Education Subsidy (TES), you must meet the following criteria: </li>
-              <br />
               <ul>
                 <li>
                 Citizenship: You must be a Filipino citizen.</li>
@@ -351,7 +347,7 @@ $show_Scholarship_link = false; // Set to false to hide, or true to show
                 <li>Proof of Income: If not in Listahanan 2.0, submit documents like pay slips, 
                   contracts, or a case study by a Social Welfare Officer to verify household income.</li>
                 <br />
-                
+                <p><span style="color: red;">Note</span>: To apply wait for further announcement</p>
               </ul>
             </div>
 

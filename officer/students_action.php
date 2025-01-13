@@ -8,19 +8,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST["action"])) {
     switch ($_POST["action"]) {
         
 
-            case 'update_status':
-                if (isset($_POST['s_id']) && isset($_POST['status'])) {
-                    $stmt = $conn->prepare("UPDATE students SET s_account_status = ? WHERE id = ?");
-                    $stmt->bind_param("si", $_POST['status'], $_POST['s_id']);
-                    
-                    if ($stmt->execute()) {
-                        echo json_encode(['success' => true]);
-                    } else {
-                        echo json_encode(['success' => false]);
-                    }
-                    $stmt->close();
+        case 'update_status':
+            if (isset($_POST['s_id']) && isset($_POST['status'])) {
+                $stmt = $conn->prepare("UPDATE scholarship_applications SET s_account_status = ? WHERE student_id = ?");
+                $stmt->bind_param("si", $_POST['status'], $_POST['s_id']);
+                
+                if ($stmt->execute()) {
+                    echo json_encode(['success' => true]);
+                } else {
+                    echo json_encode(['success' => false]);
                 }
-                break;
+                $stmt->close();
+            }
+            break;
+        
 
                 case 'send_announcement':
                 $recipient_emails = explode(', ', $_POST['student_id']); 
@@ -70,91 +71,235 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST["action"])) {
                 break;
             
 
-        case 'edit_acad':
-            $error = '';
-            $success = '';
-            $studentId = $_POST["acad_hidden_id"];
-            $data = [];
-        
-            // Check for duplicate email
-            $check_stmt = $conn->prepare("SELECT id FROM students WHERE semail = ? AND id != ?");
-            if ($check_stmt) {
-                $check_stmt->bind_param("si", $_POST["semail"], $studentId);
-                $check_stmt->execute();
-                $result = $check_stmt->get_result();
-        
-                if ($result->num_rows > 0) {
-                    $error = 'Email Address Already Exists';
-                } else {
-                    // Update the student details
-                    $update_stmt = $conn->prepare("
-                        UPDATE students 
-                        SET sid = ?, sfname = ?, smname = ?, slname = ?, sfix = ?, sdbirth = ?, sgender = ?, 
-                            sctship = ?, saddress = ?, semail = ?, scontact = ?, scourse = ?, syear = ?, 
-                            spcyincome = ?, sschool = ?, saward = ?, sreceive = ?, snote = ?
-                        WHERE id = ?
-                    ");
-        
-                    if ($update_stmt) {
-                        $update_stmt->bind_param("ssssssssssssssssssi", 
-                            $_POST["sid"], $_POST["sfname"], $_POST["smname"], $_POST["slname"], $_POST["sfix"], 
-                            $_POST["sdbirth"], $_POST["sgender"], $_POST["sctship"], $_POST["saddress"], $_POST["semail"], 
-                            $_POST["scontact"], $_POST["scourse"], $_POST["syear"], $_POST["spcyincome"], $_POST["school"], 
-                            $_POST["saward"], $_POST["sreceive"], $_POST["snote"],
-                            $studentId
+                case 'edit_acad':
+                    $studentId = $_POST["acad_hidden_id"];
+                    
+                    // Start transaction
+                    $conn->begin_transaction();
+                    try {
+                        // Update students table
+                        $stmt = $conn->prepare("
+                            UPDATE students 
+                            SET sid = ?, sfname = ?, smname = ?, slname = ?, sfix = ?, 
+                                sdbirth = ?, sgender = ?, sctship = ?, saddress = ?, 
+                                semail = ?, scontact = ?, scourse = ?, syear = ?
+                            WHERE id = ?
+                        ");
+                        $stmt->bind_param("sssssssssssssi", 
+                            $_POST["sid"], $_POST["sfname"], $_POST["smname"], $_POST["slname"],
+                            $_POST["sfix"], $_POST["sdbirth"], $_POST["sgender"], $_POST["sctship"],
+                            $_POST["saddress"], $_POST["semail"], $_POST["scontact"], 
+                            $_POST["scourse"], $_POST["syear"], $studentId
                         );
-        
-                        if ($update_stmt->execute()) {
-                            echo json_encode(['success' => 'Student Data Updated']);
-                        } else {
-                            echo json_encode(['error' => 'Error executing student update: ' . $update_stmt->error]);
-                        }
-                        $update_stmt->close();
-                        
-                    }
-                }
-                $check_stmt->close();
-            }
-            break;
-
-        case 'acad_fetch_single':
-            if (isset($_POST["s_id"])) {
-                $stmt = $conn->prepare("
-                    SELECT students.*, students.simg,
-                           students.applied_on,
-                           students.cert_file_path,
-                           students.moral_file_path,
-                           students.grades_file_path,
-                           students.grad_file_path, 
-                           family.sgfname, family.sgaddress, family.sgcontact, family.sgoccu, family.sgcompany,
-                           family.sffname, family.sfaddress, family.sfcontact, family.sfoccu, family.sfcompany,
-                           family.smfname, family.smaddress, family.smcontact, family.smoccu, family.smcompany
-                    FROM students 
-                    LEFT JOIN family ON students.id = family.student_id 
-                    WHERE students.id = ?
-                ");
-
-                $stmt->bind_param("i", $_POST["s_id"]);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $data = [];
-
-                if ($row = $result->fetch_assoc()) {
-                    foreach ($row as $key => $value) {
-                        $data[$key] = $value ?? '';
-                    }
-                }
+                        $stmt->execute();
                 
-                echo json_encode($data);
-                $stmt->close();
-            } else {
-                echo json_encode(['error' => 'Student ID not provided for academic fetch.']);
-            }
-            break;
+                        // Insert or Update scholarship_applications table for snote
+                        $stmt = $conn->prepare("
+                        INSERT INTO scholarship_applications (student_id, snote)
+                        VALUES (?, ?)
+                        ON DUPLICATE KEY UPDATE snote = VALUES(snote)
+                        ");
+                        $stmt->bind_param("is", $studentId, $_POST["snote"]);
+                        $stmt->execute();
 
-        default:
-            echo json_encode(['error' => 'Invalid action']);
-            break;
+                
+                        // Update s_family table
+                        $stmt = $conn->prepare("
+                            UPDATE s_family 
+                            SET sffname = ?, sfaddress = ?, sfcontact = ?, sfoccu = ?, sfcompany = ?,
+                                smfname = ?, smaddress = ?, smcontact = ?, smoccu = ?, smcompany = ?,
+                                sgfname = ?, sgaddress = ?, sgcontact = ?, sgoccu = ?, sgcompany = ?,
+                                spcyincome = ?
+                            WHERE student_id = ?
+                        ");
+                        $stmt->bind_param("sssssssssssssssii",
+                            $_POST["sffname"], $_POST["sfaddress"], $_POST["sfcontact"], 
+                            $_POST["sfoccu"], $_POST["sfcompany"],
+                            $_POST["smfname"], $_POST["smaddress"], $_POST["smcontact"], 
+                            $_POST["smoccu"], $_POST["smcompany"],
+                            $_POST["sgfname"], $_POST["sgaddress"], $_POST["sgcontact"], 
+                            $_POST["sgoccu"], $_POST["sgcompany"],
+                            $_POST["spcyincome"], $studentId
+                        );
+                        $stmt->execute();
+                
+                        // Update applications table
+                        $stmt = $conn->prepare("
+                            UPDATE applications a
+                            JOIN scholarship_applications sa ON a.scholarship_application_id = sa.id
+                            SET a.sschool = ?, a.saward = ?, a.sreceive = ?
+                            WHERE sa.student_id = ?
+                        ");
+                        $stmt->bind_param("sssi", 
+                            $_POST["sschool"], $_POST["saward"], $_POST["sreceive"], $studentId
+                        );
+                        $stmt->execute();
+                
+                        $conn->commit();
+                        echo json_encode(['success' => 'Student Data Updated']);
+                
+                    } catch (Exception $e) {
+                        $conn->rollback();
+                        echo json_encode(['error' => $e->getMessage()]);
+                    }
+                    break;
+
+                    case 'edit_nonacad':
+                        $studentId = $_POST["acad_hidden_id"];
+                        
+                        // Start transaction
+                        $conn->begin_transaction();
+                        try {
+                            // Update students table
+                            $stmt = $conn->prepare("
+                                UPDATE students 
+                                SET sid = ?, sfname = ?, smname = ?, slname = ?, sfix = ?, 
+                                    sdbirth = ?, sgender = ?, sctship = ?, saddress = ?, 
+                                    semail = ?, scontact = ?, scourse = ?, syear = ?
+                                WHERE id = ?
+                            ");
+                            $stmt->bind_param("sssssssssssssi", 
+                                $_POST["sid"], $_POST["sfname"], $_POST["smname"], $_POST["slname"],
+                                $_POST["sfix"], $_POST["sdbirth"], $_POST["sgender"], $_POST["sctship"],
+                                $_POST["saddress"], $_POST["semail"], $_POST["scontact"], 
+                                $_POST["scourse"], $_POST["syear"], $studentId
+                            );
+                            $stmt->execute();
+                    
+                            // Insert or Update scholarship_applications table for snote
+                            $stmt = $conn->prepare("
+                            INSERT INTO scholarship_applications (student_id, snote)
+                            VALUES (?, ?)
+                            ON DUPLICATE KEY UPDATE snote = VALUES(snote)
+                            ");
+                            $stmt->bind_param("is", $studentId, $_POST["snote"]);
+                            $stmt->execute();
+    
+                    
+                            // Update s_family table
+                            $stmt = $conn->prepare("
+                                UPDATE s_family 
+                                SET sffname = ?, sfaddress = ?, sfcontact = ?, sfoccu = ?, sfcompany = ?,
+                                    smfname = ?, smaddress = ?, smcontact = ?, smoccu = ?, smcompany = ?,
+                                    sgfname = ?, sgaddress = ?, sgcontact = ?, sgoccu = ?, sgcompany = ?,
+                                    spcyincome = ?
+                                WHERE student_id = ?
+                            ");
+                            $stmt->bind_param("sssssssssssssssii",
+                                $_POST["sffname"], $_POST["sfaddress"], $_POST["sfcontact"], 
+                                $_POST["sfoccu"], $_POST["sfcompany"],
+                                $_POST["smfname"], $_POST["smaddress"], $_POST["smcontact"], 
+                                $_POST["smoccu"], $_POST["smcompany"],
+                                $_POST["sgfname"], $_POST["sgaddress"], $_POST["sgcontact"], 
+                                $_POST["sgoccu"], $_POST["sgcompany"],
+                                $_POST["spcyincome"], $studentId
+                            );
+                            $stmt->execute();
+                    
+                            // Update applications table
+                            $stmt = $conn->prepare("
+                                UPDATE applications a
+                                JOIN scholarship_applications sa ON a.scholarship_application_id = sa.id
+                                SET a.s_nas = ?, a.s_basic = ?, a.s_skills = ?, a.s_work = ?
+                                WHERE sa.student_id = ?
+                            ");
+                            $stmt->bind_param("sssi", 
+                                $_POST["sschool"], $_POST["saward"], $_POST["sreceive"], $studentId
+                            );
+                            $stmt->execute();
+                    
+                            $conn->commit();
+                            echo json_encode(['success' => 'Student Data Updated']);
+                    
+                        } catch (Exception $e) {
+                            $conn->rollback();
+                            echo json_encode(['error' => $e->getMessage()]);
+                        }
+                        break;
+                
+
+            case 'acad_fetch_single':
+                if (isset($_POST["s_id"])) {
+                    $stmt = $conn->prepare("
+                        SELECT s.*, 
+                               sa.s_scholarship_type, sa.s_account_status, sa.snote, sa.applied_on,
+                               f.sffname, f.sfaddress, f.sfcontact, f.sfoccu, f.sfcompany,
+                               f.smfname, f.smaddress, f.smcontact, f.smoccu, f.smcompany,
+                               f.sgfname, f.sgaddress, f.sgcontact, f.sgoccu, f.sgcompany,
+                               f.spcyincome,
+                               a.sschool, a.saward, a.sreceive,
+                               a.cert_file_path, a.moral_file_path_acad, a.grades_file_path, 
+                               a.grad_file_path, a.coe_file, a.psa_file, 
+                               a.moral_file_path_admin, a.form_file, a.medc_file,
+                               a.moral_file_path_cultural, a.s_nas, a.s_basic, 
+                               a.s_skills, a.s_work, a.grades_file_non_acad,
+                               a.moral_file_path_non_acad, a.indigency_file, a.medical_file
+                        FROM students s
+                        LEFT JOIN scholarship_applications sa ON s.id = sa.student_id
+                        LEFT JOIN s_family f ON s.id = f.student_id
+                        LEFT JOIN applications a ON sa.id = a.scholarship_application_id
+                        WHERE s.id = ?
+                    ");
+            
+            
+            
+                    $stmt->bind_param("i", $_POST["s_id"]);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $data = [];
+            
+                    if ($row = $result->fetch_assoc()) {
+                        foreach ($row as $key => $value) {
+                            $data[$key] = $value ?? '';
+                        }
+                    }
+                    
+                    echo json_encode($data);
+                    $stmt->close();
+                }
+                break;
+
+                case 'nonacad_fetch_single':
+                    if (isset($_POST["s_id"])) {
+                        $stmt = $conn->prepare("
+                            SELECT s.*, 
+                                   sa.s_scholarship_type, sa.s_account_status, sa.snote, sa.applied_on,
+                                   f.sffname, f.sfaddress, f.sfcontact, f.sfoccu, f.sfcompany,
+                                   f.smfname, f.smaddress, f.smcontact, f.smoccu, f.smcompany,
+                                   f.sgfname, f.sgaddress, f.sgcontact, f.sgoccu, f.sgcompany,
+                                   f.spcyincome,
+                                   a.s_nas, a.s_basic, a.s_skills, a.s_work,
+                                   a.cert_file_path, a.moral_file_path_acad, a.grades_file_path, 
+                                   a.grad_file_path, a.coe_file, a.psa_file, 
+                                   a.moral_file_path_admin, a.form_file, a.medc_file,
+                                   a.moral_file_path_cultural, a.s_nas, a.s_basic, 
+                                   a.s_skills, a.s_work, a.grades_file_non_acad,
+                                   a.moral_file_path_non_acad, a.indigency_file, a.medical_file
+                            FROM students s
+                            LEFT JOIN scholarship_applications sa ON s.id = sa.student_id
+                            LEFT JOIN s_family f ON s.id = f.student_id
+                            LEFT JOIN applications a ON sa.id = a.scholarship_application_id
+                            WHERE s.id = ?
+                        ");
+                
+                
+                
+                        $stmt->bind_param("i", $_POST["s_id"]);
+                        $stmt->execute();
+                        $result = $stmt->get_result();
+                        $data = [];
+                
+                        if ($row = $result->fetch_assoc()) {
+                            foreach ($row as $key => $value) {
+                                $data[$key] = $value ?? '';
+                            }
+                        }
+                        
+                        echo json_encode($data);
+                        $stmt->close();
+                    }
+                    break;
+            
     }
 
     $conn->close();

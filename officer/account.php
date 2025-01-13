@@ -2,9 +2,13 @@
 include('../includes/db.php');
 
 
-$sql = "SELECT id, sfname, slname, sid, semail, account_status 
-        FROM students 
-        WHERE is_scholar = 0 AND account_status = 'Inactive'";
+$sql = "SELECT s.id, s.sfname, s.slname, s.sid, s.semail, o.account_status 
+        FROM students s
+        LEFT JOIN officer o ON s.id = o.student_id
+        LEFT JOIN admin_status a ON s.id = a.student_id
+        WHERE (a.is_scholar = 0 OR a.is_scholar IS NULL)";
+
+
 
 $result = $conn->query($sql);
 
@@ -61,7 +65,7 @@ if (!$result) {
 
   
    <!-- Sidebar -->
-   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+   <ul class="navbar-nav bg-gray-700 sidebar sidebar-dark accordion" id="accordionSidebar">
 
 
 
@@ -87,7 +91,7 @@ if (!$result) {
 <!-- Nav Item - Dashboard -->
 <li class="nav-item">
   <a class="nav-link" href="students.php">
-  <i class="fa-solid fa-users"></i>
+  <i class="fa-solid fa-address-card"></i>
     <span>Applicants</span></a>
 </li>
 
@@ -114,7 +118,7 @@ if (!$result) {
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="navbar navbar-expand navbar-dark navbar-crimson topbar mb-4 static-top shadow">
 
           
 
@@ -130,7 +134,7 @@ if (!$result) {
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <span class="mr-2 d-none d-lg-inline text-white small">
                   
                Officer
                   
@@ -187,7 +191,7 @@ if (!$result) {
   <div class="container-fluid">
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Students Management</h6>
+        <h6 class="m-0 font-weight-bold text-gray">Students Management</h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">

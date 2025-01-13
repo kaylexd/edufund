@@ -1,6 +1,6 @@
 
    <!-- Sidebar -->
-   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+   <ul class="navbar-nav bg-gray-700 sidebar sidebar-dark accordion" id="accordionSidebar">
 
 
 <body>
@@ -34,7 +34,7 @@
 <!-- Nav Item - Tables -->
 <li class="nav-item">
   <a class="nav-link" href="scholars.php">
-  <i class="fas fa-fw fa-folder"></i>
+  <i class="fa-solid fa-users-between-lines"></i>
     <span>Scholars</span></a>
 </li>
 
@@ -42,6 +42,12 @@
 <li class="nav-item">
   <a class="nav-link" href="students.php">
   <i class="fa-solid fa-users"></i>
+    <span>Applicants</span></a>
+</li>
+
+<li class="nav-item">
+  <a class="nav-link" href="student.php">
+  <i class="fa-solid fa-user-group"></i>
     <span>Students</span></a>
 </li>
 
@@ -51,7 +57,11 @@
     <span>Generate Report</span></a>
 </li>
 
-
+<li class="nav-item">
+  <a class="nav-link" href="schedule.php">
+  <i class="fas fa-fw fa-cog"></i>
+    <span>Set Schedule</span></a>
+</li>
 </ul>
 <!-- End of Sidebar -->
 
@@ -62,13 +72,13 @@
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="navbar navbar-expand navbar-dark navbar-crimson topbar mb-4 static-top shadow">
 
-          <!-- Sidebar Toggle (Topbar) -->
+          <!-- Sidebar Toggle (Topbar) 
           <button id="sidebarToggleTop" class="btn btn-link  rounded-circle mr-3">
             <i class="fa fa-bars"></i>
           </button>
-
+      -->
           
 
           <!-- Topbar Navbar -->
@@ -85,7 +95,7 @@
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <span class="mr-2 d-none d-lg-inline text-white small">
                   
                ADMIN
                   

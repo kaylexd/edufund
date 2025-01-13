@@ -11071,3 +11071,10 @@ body.sidebar-toggled footer.sticky-footer {
   max-width: 800px; /* Change this value to increase or decrease width */
   width: 100%; /* Ensure it uses the full width defined by max-width */
 }
+.navbar.navbar-dark.navbar-crimson {
+  background-color: #dc143c !important;
+  color: #dc143c;
+}
+.text-crimson {
+  color: #dc143c !important;
+}

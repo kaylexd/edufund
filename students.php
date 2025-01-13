@@ -4,7 +4,14 @@ include('includes/navbar.php');
 include('includes/db.php');
 
 // Query to select student data including the image
-$sql = "SELECT id, sid, sfname, slname, scourse, syear, sfix, sdbirth, sgender, sctship, saddress, scontact, simg, s_scholar_status, s_account_status, s_scholarship_type  FROM students WHERE is_scholar = 0 AND s_account_status = 'Valid' AND s_scholar_status != 'Rejected'";
+$sql = "SELECT s.*, sa.s_scholarship_type, sa.s_account_status, a.is_scholar 
+        FROM students s
+        LEFT JOIN scholarship_applications sa ON s.id = sa.student_id 
+        LEFT JOIN admin_status a ON s.id = a.student_id
+        WHERE (a.is_scholar = 0 OR a.is_scholar IS NULL)
+        AND sa.s_account_status = 'Valid' 
+        AND sa.s_account_status != 'Rejected'";
+
 $result = $conn->query($sql);
 
 if (!$result) {
@@ -15,7 +22,7 @@ if (!$result) {
 <div class="container-fluid">
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Application Management</h6>
+        <h6 class="m-0 font-weight-bold text-bg-gray">Application Management</h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -320,17 +327,7 @@ if (!$result) {
 								</div>
 							</div>
 						</div>
-						<div class="form-group">
-							<div class="card">
-							<div class="card-header" style="font-weight: bold; font-size: 18px;">Scholar Remarks</div>
-								<div class="card-body">
-									<div class="col-xs-12 col-sm-12 col-md-12">
-										<label>Remarks:</label>
-										<textarea type="text" name="snote" id="snote" placeholder="Put N/A if None" class="form-control" required data-parsley-trigger="keyup"></textarea>
-									</div>
-								</div>
-							</div>
-						</div>
+						
 					</div>
 					<div class="modal-footer">
 						<input type="hidden" name="acad_hidden_id" id="acad_hidden_id" />
@@ -404,23 +401,7 @@ if (!$result) {
             </div>
         </div>
     </div>
-<!-- View CHED Modal -->
-	<div id="viewchedModal" class="modal fade">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="modal_title">View Student Details</h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body" id="ched_details">
-                    
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
             </table>
         </div>
