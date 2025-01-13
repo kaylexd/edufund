@@ -14,7 +14,7 @@ To set up the Online Scholarship Application System locally, follow these steps:
 
 1\. Clone the Repository  
     
-git clone https://github.com/your-repo/scholarship-system.git
+git clone https://github.com/kaylexd/edufund
 
 2\. Navigate to the Project Directory  
     
