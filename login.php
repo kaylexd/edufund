@@ -18,12 +18,7 @@ session_start();
   <header>
       
       <nav>
-      <?php
-// Define a condition to hide the Home link
-$show_Scholarship_link = false; // Set to false to hide, or true to show
-
-// Navigation menu
-?>
+  
         <ul>
           <b></b>
           <li><h3 ><a href="home.php" class="about-link" style="text-decoration: none; color:white;">College Edufund  of St.Cecilia's </a></h3></li>
@@ -37,9 +32,9 @@ $show_Scholarship_link = false; // Set to false to hide, or true to show
           <li><a href="Aboutus.php" class="register-link"style="text-decoration: none; color:white;">About us</a></li>
           <li><a href="register.php" class="register-link"style="text-decoration: none; color:white;">Register</a></li>
           <li><a href="login.php" class="about-link" style="text-decoration: none; color:white;">Login</a></li>
-          <?php if ($show_Scholarship_link): ?>
+          
             <li><a href="Scholarship.php" class="register-link"style="text-decoration: none; color:white;">Scholarships</a></li>
-            <?php endif; ?>
+            <li></li>
           
 
           </div>
@@ -75,18 +70,13 @@ $show_Scholarship_link = false; // Set to false to hide, or true to show
                   <input type="password" name="password" placeholder="Password" class="input-field">
               </div>
             
-                 <label class="custom-checkbox">
-                    <input type="checkbox">
-                      <span class="checkmark"></span>
-                      <p>Remember me</p>
-                    </label>
                   <a href="#" class="forgot-password">Forgot Password?</a>
                   <br>
                   <br>
                   <div class="button">
-                    <button type="submit">Login</button>
-                    <a href="register.php"><button type="button">Register</button></a>
-                  </div>
+    <button type="submit" style="width: 80%;">Login</button>
+</div>
+
                   
              </form>  
             </div>  

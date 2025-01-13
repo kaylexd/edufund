@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $id = $_SESSION['user_id'];
 
 // Fetch student data
-$query = "SELECT sfname, smname, slname, semail, s_pass FROM students WHERE id = ?";
+$query = "SELECT sfname, smname, slname, semail, spass FROM students WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -22,7 +22,7 @@ $sfname = isset($row['sfname']) ? $row['sfname'] : '';
 $smname = isset($row['smname']) ? $row['smname'] : '';
 $slname = isset($row['slname']) ? $row['slname'] : '';
 $semail = isset($row['semail']) ? $row['semail'] : '';
-$s_pass = isset($row['s_pass']) ? $row['s_pass'] : '';
+$spass = isset($row['spass']) ? $row['spass'] : '';
 
 // In the notifications dropdown
 $sql = "SELECT * FROM announcements WHERE student_id = ? AND is_read = 0 ORDER BY created_at DESC";
@@ -32,12 +32,7 @@ $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $result = $stmt->get_result();
 
-while($row = $result->fetch_assoc()) {
-    echo "<div class='dropdown-item'>";
-    echo htmlspecialchars($row['message']);
-    echo "<div class='small text-gray-500'>" . $row['created_at'] . "</div>";
-    echo "</div>";
-}
+
 
 $sql = "SELECT COUNT(*) as count FROM announcements WHERE student_id = ? AND is_read = 0";
 $stmt = $conn->prepare($sql);
@@ -88,12 +83,50 @@ $count = $result->fetch_assoc()['count'];
 <body id="page-top">
 
   <!-- Page Wrapper -->
+  <?php
+$announcement_query = "SELECT message FROM announcements ORDER BY created_at DESC LIMIT 1";
+$announcement_result = $conn->query($announcement_query);
+$announcement_text = "No announcement at the moment";
+if ($announcement_result->num_rows > 0) {
+    $announcement_text = $announcement_result->fetch_assoc()['message'];
+}
+?>
+
+<style>
+@keyframes scroll-left {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+.marquee-container {
+    overflow: hidden;
+    background-color: #f8f9fc;
+    padding: 8px 0;
+    width: 100%;
+}
+.marquee-text {
+    display: inline-block;
+    animation: scroll-left 25s linear infinite;
+    white-space: nowrap;
+}
+</style>
+
+<div class="marquee-container">
+    <div class="marquee-text">
+    <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+    </div>
+</div>
   <div id="wrapper">
 
 
   
    <!-- Sidebar -->
-   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+   <ul class="navbar-nav bg-gray-700 sidebar sidebar-dark accordion" id="accordionSidebar">
 
 
 
@@ -124,7 +157,7 @@ $count = $result->fetch_assoc()['count'];
 
 <li class="nav-item">
   <a class="nav-link" href="profile.php">
-  <i class="fa-solid fa-magnifying-glass"></i>
+  <i class="fa-solid fa-user"></i>
     <span>Profile</span></a>
 </li>
 <!-- Heading 
@@ -145,7 +178,7 @@ $count = $result->fetch_assoc()['count'];
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="navbar navbar-expand navbar-dark navbar-crimson topbar mb-4 static-top shadow">
 
           
 
@@ -158,7 +191,7 @@ $count = $result->fetch_assoc()['count'];
           <li class="nav-item dropdown no-arrow mx-1">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fas fa-bell fa-fw"></i>
+                  <i class="fas fa-bell fa-fw text-white"></i>
                   <!-- Counter - Alerts -->
                   <span class="badge badge-danger badge-counter"><?php echo $count; ?></span>
               </a>
@@ -192,7 +225,7 @@ $count = $result->fetch_assoc()['count'];
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <span class="mr-2 d-none d-lg-inline text-white small">
                 <?php echo htmlspecialchars($semail); ?> 
                 </span>
                 <img class="img-profile rounded-circle" src="../img/user-solid.svg">
@@ -223,7 +256,7 @@ $count = $result->fetch_assoc()['count'];
             <!-- Display Profile Information -->
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Student Profile</h6>
+        <h6 class="m-0 font-weight-bold text-bg-gray">Student Profile</h6>
     </div>
     <div class="card-body">
         <div class="table-responsive">

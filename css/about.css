@@ -615,13 +615,12 @@
       header {
         display: flex;
         align-items: center;
-        background-color: crimson; /* Reduced opacity */
+        background-color: rgb(252, 14, 61); /* Reduced opacity */
       
         margin: auto 0;
       }
-      header h3 {
-        margin-left: 100px;
-      }
+      
+      
       nav ul {
         list-style: none;
         display: flex;

@@ -2,7 +2,7 @@
 
 include('../includes/db.php');
 
-$sql = "SELECT COUNT(*) AS pending_count FROM students WHERE s_account_status = 'pending'";
+$sql = "SELECT COUNT(*) AS pending_count FROM scholarship_applications WHERE s_account_status = 'pending'";
 $result = $conn->query($sql);
 
 // Fetch the count from the result
@@ -60,7 +60,8 @@ if ($result && $row = $result->fetch_assoc()) {
 
   
    <!-- Sidebar -->
-   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+   <ul class="navbar-nav bg-gray-700 sidebar sidebar-dark accordion" id="accordionSidebar">
+
 
 
 
@@ -85,7 +86,7 @@ if ($result && $row = $result->fetch_assoc()) {
 <!-- Nav Item - Dashboard -->
 <li class="nav-item">
   <a class="nav-link" href="students.php">
-  <i class="fa-solid fa-users"></i>
+  <i class="fa-solid fa-address-card"></i>
     <span>Applicants</span></a>
 </li>
 
@@ -115,7 +116,8 @@ if ($result && $row = $result->fetch_assoc()) {
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="navbar navbar-expand navbar-dark navbar-crimson topbar mb-4 static-top shadow">
+
 
           
 
@@ -131,7 +133,7 @@ if ($result && $row = $result->fetch_assoc()) {
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <span class="mr-2 d-none d-lg-inline text-white small">
                   
                Officer
                   
@@ -158,19 +160,222 @@ if ($result && $row = $result->fetch_assoc()) {
         <!-- End of Topbar -->
         
 
-        <div class="col-xl-3 col-md-6 mb-4">
-  <div class="card border-left-primary shadow h-100 py-2">
-    <div class="card-body">
-      <div class="row no-gutters align-items-center">
-        <div class="col mr-2">
-          <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Applicants</div>
-          <div class="h5 mb-0 font-weight-bold text-gray-800">
-            <?php echo htmlspecialchars($pending_count); ?> <!-- Display the pending count -->
-          </div>
+        <div class="container-fluid mt-4">
+<div class="row">
+<div class="container-fluid mt-4">
+<div class="row">
+    <!-- Individual Scholarship Status Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-bg-gray text-uppercase mb-1">Total Applicants</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            <?php $sql = "SELECT COUNT(*) as total_count 
+        FROM students s
+        JOIN admin_status a ON s.id = a.student_id
+        JOIN officer o ON s.id = o.student_id
+        JOIN scholarship_applications sa ON s.id = sa.student_id
+        WHERE a.is_scholar = 0
+        AND a.s_scholar_status = 'Pending'
+        AND o.account_status = 'Active'
+        AND sa.s_scholarship_type IN ('Academic', 'Non-Academic', 'Admin Scholar')";
+
+$result = $conn->query($sql);
+$row = $result->fetch_assoc();
+echo htmlspecialchars($row['total_count']);
+ ?>
+                        </div>
+                        <div class="mt-2">
+                            <a href="students.php" class="text-primary" style="text-decoration: underline;">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+            <div class="row no-gutters align-items-center">
+                <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-bg-gray text-uppercase mb-1">Total Registered</div>
+                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                <?php 
+                        $sql = "SELECT COUNT(*) AS total_count 
+                        FROM students s
+                        LEFT JOIN officer o ON s.id = o.student_id
+                        LEFT JOIN admin_status a ON s.id = a.student_id
+                        WHERE (a.is_scholar = 0 OR a.is_scholar IS NULL)";
+                $result = $conn->query($sql);
+                $row = $result->fetch_assoc();
+                echo htmlspecialchars($row['total_count']);
+                
+                
+                        ?>
+                        </div>
+                        <div class="mt-2">
+                            <a href="account.php" class="text-primary" style="text-decoration: underline;">View Details</a>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+   
+    
+    
+							<!-- Chart Container -->
+<div class="col-xl-8 col-lg-7">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-gray-800">Active Scholarships Distribution</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-area">
+                <canvas id="myAreaChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Area Chart
+var ctx = document.getElementById("myAreaChart");
+var myLineChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ["Academic", "Non-Academic", "Admin Scholar"],
+        datasets: [{
+            label: "Active Scholarships",
+            backgroundColor: [
+                'rgba(78, 115, 223, 0.8)',
+                'rgba(28, 200, 138, 0.8)',
+                'rgba(231, 74, 59, 0.8)'
+            ],
+            data: [
+                <?php
+                $sql = "SELECT 
+                    SUM(CASE WHEN s_scholarship_type = 'Academic' THEN 1 ELSE 0 END) as academic,
+                    SUM(CASE WHEN s_scholarship_type = 'Non-Academic' THEN 1 ELSE 0 END) as nonacademic,
+                    SUM(CASE WHEN s_scholarship_type = 'Admin Scholar' THEN 1 ELSE 0 END) as admin
+                FROM scholarship_applications 
+                WHERE s_account_status = 'Valid'";
+                
+                $result = $conn->query($sql);
+                $row = $result->fetch_assoc();
+                
+                echo $row['academic'] . ", ";
+                echo $row['nonacademic'] . ", ";
+                echo $row['admin'];
+                ?>
+            ]
+        }]
+    },
+    options: {
+        maintainAspectRatio: false,
+        layout: {
+            padding: {
+                left: 10,
+                right: 25,
+                top: 25,
+                bottom: 0
+            }
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        },
+        legend: {
+            display: false
+        },
+        title: {
+            display: true,
+            text: 'Active Scholarships Distribution'
+        }
+    }
+});
+
+</script>
+
+
+							<!-- Program Distribution Chart -->
+<div class="col-xl-4 col-lg-5">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-gray-800">Programs</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-pie pt-4 pb-2">
+                <canvas id="myPieChart"></canvas>
+            </div>
+            <div class="mt-4 text-center small">
+                <?php
+                $courses = ['BSIT', 'BSBA', 'BEED', 'BSED', 'BSCRIM', 'BSHM', 'BSTM'];
+                $colors = ['text-primary', 'text-success', 'text-info', 'text-warning', 'text-danger', 'text-secondary', 'text-dark'];
+                foreach($courses as $index => $course) {
+                    echo "<span class='mr-2'><i class='fas fa-circle {$colors[$index]}'></i> {$course}</span>";
+                }
+                ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var ctx = document.getElementById("myPieChart");
+var myPieChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ["BSIT", "BSBA", "BEED", "BSED", "BSCRIM", "BSHM", "BSTM"],
+        datasets: [{
+            data: [
+                <?php
+                foreach($courses as $course) {
+                    $sql = "SELECT COUNT(*) as count FROM students WHERE scourse = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("s", $course);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $count = $result->fetch_assoc()['count'];
+                    echo $count . ",";
+                }
+                ?>
+            ],
+            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69'],
+            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be2617', '#60616f', '#373840'],
+            hoverBorderColor: "rgba(234, 236, 244, 1)",
+        }],
+    },
+    options: {
+        maintainAspectRatio: false,
+        tooltips: {
+            backgroundColor: "rgb(255,255,255)",
+            bodyFontColor: "#858796",
+            borderColor: '#dddfeb',
+            borderWidth: 1,
+            xPadding: 15,
+            yPadding: 15,
+            displayColors: false,
+            caretPadding: 10,
+        },
+        legend: {
+            display: false
+        },
+        cutoutPercentage: 80,
+    },
+});
+</script>
+
+
+
+
 </div>
   <!-- Scroll to Top Button-->
   <a class="scroll-to-top rounded" href="#page-top">

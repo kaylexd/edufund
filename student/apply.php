@@ -10,26 +10,43 @@ if (!isset($_SESSION['user_id'])) {
 }
 $user_id = $_SESSION['user_id'];
 
-$check_status = "SELECT s_account_status, s_scholar_status, is_scholar FROM students WHERE id = ?";
+$check_status = "SELECT sa.s_account_status, ast.s_scholar_status, ast.is_scholar 
+                 FROM students s
+                 LEFT JOIN scholarship_applications sa ON s.id = sa.student_id
+                 LEFT JOIN admin_status ast ON s.id = ast.student_id
+                 WHERE s.id = ?";
+
 $stmt = $conn->prepare($check_status);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $status = $result->fetch_assoc();
 
-if($status['s_scholar_status'] === 'Approved' && $status['is_scholar'] == 1) {
-    $_SESSION['status_msg'] = "Your scholarship application has been approved.";
-    header("Location: index.php");
-    exit();
-} elseif($status['s_scholar_status'] === 'Rejected') {
-    $_SESSION['status_msg'] = "Your scholarship application has been rejected.";
-    header("Location: index.php");
-    exit();
-} elseif($status['s_account_status'] === 'Pending') {
-    $_SESSION['status_msg'] = "You have already submitted a scholarship application.";
-    header("Location: index.php");
-    exit();
+// Add null checks before accessing array values
+if ($status) {
+    if(isset($status['s_scholar_status']) && $status['s_scholar_status'] === 'Approved' 
+       && isset($status['is_scholar']) && $status['is_scholar'] == 1) {
+        $_SESSION['status_msg'] = "Your scholarship application has been approved.";
+        header("Location: index.php");
+        exit();
+    } 
+    elseif(isset($status['s_scholar_status']) && $status['s_scholar_status'] === 'Rejected') {
+        $_SESSION['status_msg'] = "Your scholarship application has been rejected.";
+        header("Location: index.php");
+        exit();
+    }
+    elseif(isset($status['s_account_status']) && $status['s_account_status'] === 'Pending') {
+        $_SESSION['status_msg'] = "You have already submitted a scholarship application.";
+        header("Location: index.php");
+        exit();
+      }
+      elseif (isset($status['s_account_status']) && $status['s_account_status'] === 'Invalid') {
+          $_SESSION['status_msg'] = "Your scholarship application has been rejected.";
+          header("Location: index.php");
+          exit();
+    }
 }
+
 
 
 
@@ -53,12 +70,6 @@ $stmt->bind_param("i", $_SESSION['user_id']);
 $stmt->execute();
 $result = $stmt->get_result();
 
-while($row = $result->fetch_assoc()) {
-    echo "<div class='dropdown-item'>";
-    echo htmlspecialchars($row['message']);
-    echo "<div class='small text-gray-500'>" . $row['created_at'] . "</div>";
-    echo "</div>";
-}
 
 $sql = "SELECT COUNT(*) as count FROM announcements WHERE student_id = ? AND is_read = 0";
 $stmt = $conn->prepare($sql);
@@ -98,12 +109,50 @@ $count = $result->fetch_assoc()['count'];
 <body id="page-top">
 
   <!-- Page Wrapper -->
+  <?php
+$announcement_query = "SELECT message FROM announcements ORDER BY created_at DESC LIMIT 1";
+$announcement_result = $conn->query($announcement_query);
+$announcement_text = "No announcement at the moment";
+if ($announcement_result->num_rows > 0) {
+    $announcement_text = $announcement_result->fetch_assoc()['message'];
+}
+?>
+
+<style>
+@keyframes scroll-left {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+.marquee-container {
+    overflow: hidden;
+    background-color: #f8f9fc;
+    padding: 8px 0;
+    width: 100%;
+}
+.marquee-text {
+    display: inline-block;
+    animation: scroll-left 25s linear infinite;
+    white-space: nowrap;
+}
+</style>
+
+<div class="marquee-container">
+    <div class="marquee-text">
+    <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+    </div>
+</div>
   <div id="wrapper">
 
 
   
    <!-- Sidebar -->
-   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+   <ul class="navbar-nav bg-gray-700 sidebar sidebar-dark accordion" id="accordionSidebar">
 
 
 
@@ -134,7 +183,7 @@ $count = $result->fetch_assoc()['count'];
 
 <li class="nav-item">
   <a class="nav-link" href="profile.php">
-  <i class="fa-solid fa-magnifying-glass"></i>
+  <i class="fa-solid fa-user"></i>
     <span>Profile</span></a>
 </li>
 <!-- Heading 
@@ -153,7 +202,7 @@ $count = $result->fetch_assoc()['count'];
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="navbar navbar-expand navbar-dark navbar-crimson topbar mb-4 static-top shadow">
 
         
 
@@ -166,7 +215,7 @@ $count = $result->fetch_assoc()['count'];
           <li class="nav-item dropdown no-arrow mx-1">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fas fa-bell fa-fw"></i>
+                  <i class="fas fa-bell fa-fw text-white"></i>
                   <!-- Counter - Alerts -->
                   <span class="badge badge-danger badge-counter"><?php echo $count; ?></span>
               </a>
@@ -201,7 +250,7 @@ $count = $result->fetch_assoc()['count'];
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <span class="mr-2 d-none d-lg-inline text-white small">
                 <?php echo htmlspecialchars($semail); ?>
                </span>
                 <img class="img-profile rounded-circle" src="../img/user-solid.svg">
@@ -269,23 +318,25 @@ $count = $result->fetch_assoc()['count'];
             <div class="card">
                 <div class="card-header" style="font-weight: bold; font-size: 18px;">Scholarships</div>
                 <div class="card-body">
-                    <div class="form-group">
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-12 col-md-12">
-                                <select name="select_sch" id="select_sch" class="form-control">
-                                    <option value="" selected>Choose Scholarship</option>
-                                    <optgroup label="School">
-                                        <option value="1" title="Applicant Must Be...">Academic</option>
-                                        <option value="2" title="Applicant Must Be...">Non-Academic</option>
-                                    </optgroup>
-                                    <optgroup label="Government">
-                                        <option value="3" title="Applicant Must Be...">UNIFAST</option>
-                                        <option value="4" title="Applicant Must Be...">CHED</option>
-                                    </optgroup>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                <div class="form-group">
+    <select name="select_sch" id="select_sch" class="form-control">
+        <option value="" selected>Choose Scholarship</option>
+        <?php
+        // Fetch active scholarships
+        $sql = "SELECT id, scholarship_name FROM scholarship_status WHERE status = 'open'";
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo "<option value='" . htmlspecialchars($row['id']) . "'>" . htmlspecialchars($row['scholarship_name']) . "</option>";
+            }
+        } else {
+            echo "<option value=''>No scholarships available</option>";
+        }
+        ?>
+    </select>
+</div>
+
                     <div class="form-group text-center">
                         <button type="button" name="btn_choose" id="btn_choose" class="btn btn-success">Submit</button>
                     </div>
@@ -299,20 +350,25 @@ $count = $result->fetch_assoc()['count'];
 
 <script>
     $('#btn_choose').click(function() {
-      var sel = document.getElementById('select_sch').value;
-      
-      if (sel === "1") {
-        window.location.href = "application.php";
-      } else if (sel === "2") {
-        window.location.href = "non-academic.php";
-      } else if (sel === "3") {
-        window.location.href = "application.php";
-      } else if (sel === "4") {
-        window.location.href = "application.php";
-      } else {
-        alert("Please select a scholarship");
-      }
-    });
+    var sel = $('#select_sch').val();
+    
+    switch(sel) {
+        case "1":
+            window.location.href = "application.php";
+            break;
+        case "2":
+            window.location.href = "non-academic.php";
+            break;
+        case "3":
+            window.location.href = "admin_app.php";
+            break;
+        case "4":
+            window.location.href = "cultural.php";
+            break;
+        default:
+            alert("Please select a scholarship");
+    }
+});
 
     var title = [];
     $('#select_sch option').each(function() {

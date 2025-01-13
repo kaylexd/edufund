@@ -23,6 +23,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $s_scholarship_type = 'Academic';
     $applied_on = date('Y-m-d');
     $s_account_status = 'Pending';
+
+    // Family details
     $sffname = trim($_POST['sffname']);
     $sfaddress = trim($_POST['sfaddress']);
     $sfcontact = trim($_POST['sfcontact']);
@@ -38,116 +40,126 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sgcontact = trim($_POST['sgcontact']);
     $sgoccu = trim($_POST['sgoccu']);
     $sgcompany = trim($_POST['sgcompany']);
-    $spcyincome = trim($_POST['spcyincome']); 
-    $sschool = trim($_POST['sschool']);       
-    $saward = trim($_POST['saward']);         
-    $sreceive = $_POST['sreceive'];           
+    $spcyincome = (int)trim($_POST['spcyincome']);
 
-    $stmt = $conn->prepare("SELECT id FROM students WHERE slname = ? AND sdbirth = ? AND is_scholar = 1");
-    $stmt->bind_param("ss", $slname, $sdbirth);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Academic application details
+    $sschool = trim($_POST['sschool']);
+    $saward = trim($_POST['saward']);
+    $sreceive = $_POST['sreceive'];
 
-    if ($result->num_rows > 0) {
-        echo "<script>alert('You have already applied for a scholarship. If you have any concerns, please contact the Admin.');</script>";
-        echo "<script>window.location.href = 'index.php';</script>";
-    }
+    // Handle file uploads
+    $upload_dir = "../img/";
+    $uploaded_files = [];
 
-    // If no errors, proceed with updating or inserting data
-    if (empty($errors)) {
-        // Check if the user already has an entry in the students table
-        $stmt = $conn->prepare("SELECT id FROM students WHERE id = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-    
-        if ($_FILES) {
-            $upload_dir = "../img/";
-            $requirements = [
-                'cert_file' => 'cert_file_path',
-                'moral_file' => 'moral_file_path',
-                'grades_file' => 'grades_file_path',
-                'grad_file' => 'grad_file_path'
-            ];
-        
-            foreach ($requirements as $input_name => $column_name) {
-                if (isset($_FILES[$input_name]) && $_FILES[$input_name]['error'] == 0) {
-                    $file = $_FILES[$input_name];
-                    $filename = time() . '_' . $user_id . '_' . basename($file['name']);
-                    $filepath = $upload_dir . $filename;
-        
-                    if (move_uploaded_file($file['tmp_name'], $filepath)) {
-                        $query = "UPDATE students SET `{$column_name}` = ? WHERE id = ?";
-                        $stmt = $conn->prepare($query);
-                        $stmt->bind_param("si", $filepath, $user_id);
-                        $stmt->execute();
-                        $stmt->close();
-                    }
+    if ($_FILES) {
+        $requirements = [
+            'cert_file' => 'cert_file_path',
+            'moral_file' => 'moral_file_path_acad',
+            'grades_file' => 'grades_file_path',
+            'grad_file' => 'grad_file_path'
+        ];
+
+        foreach ($requirements as $input_name => $column_name) {
+            if (isset($_FILES[$input_name]) && $_FILES[$input_name]['error'] == 0) {
+                $file = $_FILES[$input_name];
+                $filename = time() . '_' . $user_id . '_' . basename($file['name']);
+                $filepath = $upload_dir . $filename;
+
+                if (move_uploaded_file($file['tmp_name'], $filepath)) {
+                    $uploaded_files[$column_name] = $filepath;
+                } else {
+                    $errors[] = "Failed to upload file: $input_name";
                 }
             }
         }
-        
+    }
 
-    if ($result->num_rows > 0) {
-        // Update student details
-        $stmt = $conn->prepare("UPDATE students SET sfname = ?, smname = ?, slname = ?, sfix = ?, sdbirth = ?, sgender = ?, sctship = ?, saddress = ?, scontact = ?, semail = ?, scourse = ?, syear = ?, spcyincome = ?, sschool = ?, saward = ?, sreceive = ?, s_scholarship_type = ?, applied_on = ?, s_account_status = ? WHERE id = ?");
-        $stmt->bind_param("sssssssssssssssssssi", $sfname, $smname, $slname, $sfix, $sdbirth, $sgender, $sctship, $saddress, $scontact, $semail, $scourse, $syear, $spcyincome, $sschool, $saward, $sreceive, $s_scholarship_type, $applied_on, $s_account_status, $user_id);
+    // If no errors, proceed with database operations
+    if (empty($errors)) {
+        try {
+            // Start transaction
+            $conn->begin_transaction();
 
-        if ($stmt->execute()) {
-            // Check if family details exist for this user
-            $familyCheckStmt = $conn->prepare("SELECT f_id FROM family WHERE student_id = ?");
-            if (!$familyCheckStmt) {
-                die("Prepare failed: " . $conn->error);
+            // Insert or update student details
+            $stmt = $conn->prepare("
+                INSERT INTO students (id, sfname, smname, slname, sfix, sdbirth, sgender, sctship, saddress, scontact, semail, scourse, syear)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                    sfname = VALUES(sfname), smname = VALUES(smname), slname = VALUES(slname),
+                    sfix = VALUES(sfix), sdbirth = VALUES(sdbirth), sgender = VALUES(sgender),
+                    sctship = VALUES(sctship), saddress = VALUES(saddress), scontact = VALUES(scontact),
+                    semail = VALUES(semail), scourse = VALUES(scourse), syear = VALUES(syear)
+            ");
+            $stmt->bind_param("issssssssssss", $user_id, $sfname, $smname, $slname, $sfix, $sdbirth, $sgender, $sctship, $saddress, $scontact, $semail, $scourse, $syear);
+            $stmt->execute();
+
+            // Insert or update family details
+            $stmt = $conn->prepare("
+                INSERT INTO s_family (student_id, sffname, sfaddress, sfcontact, sfoccu, sfcompany, smfname, smaddress, smcontact, smoccu, smcompany, sgfname, sgaddress, sgcontact, sgoccu, sgcompany, spcyincome)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                    sffname = VALUES(sffname), sfaddress = VALUES(sfaddress), sfcontact = VALUES(sfcontact), sfoccu = VALUES(sfoccu),
+                    sfcompany = VALUES(sfcompany), smfname = VALUES(smfname), smaddress = VALUES(smaddress), smcontact = VALUES(smcontact),
+                    smoccu = VALUES(smoccu), smcompany = VALUES(smcompany), sgfname = VALUES(sgfname), sgaddress = VALUES(sgaddress),
+                    sgcontact = VALUES(sgcontact), sgoccu = VALUES(sgoccu), sgcompany = VALUES(sgcompany), spcyincome = VALUES(spcyincome)
+            ");
+            $stmt->bind_param("isssssssssssssssi", $user_id, $sffname, $sfaddress, $sfcontact, $sfoccu, $sfcompany, $smfname, $smaddress, $smcontact, $smoccu, $smcompany, $sgfname, $sgaddress, $sgcontact, $sgoccu, $sgcompany, $spcyincome);
+            $stmt->execute();
+
+            $stmt = $conn->prepare("
+                INSERT INTO admin_status (student_id, s_scholar_status)
+                VALUES (?, 'Pending')
+                ON DUPLICATE KEY UPDATE s_scholar_status = VALUES(s_scholar_status)
+            ");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+
+            // Insert scholarship application first to get the ID
+            $stmt = $conn->prepare("
+                INSERT INTO scholarship_applications (student_id, s_scholarship_type, applied_on, s_account_status)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                    s_scholarship_type = VALUES(s_scholarship_type), 
+                    applied_on = VALUES(applied_on), 
+                    s_account_status = VALUES(s_account_status)
+            ");
+            $stmt->bind_param("isss", $user_id, $s_scholarship_type, $applied_on, $s_account_status);
+            $stmt->execute();
+            $scholarship_application_id = $stmt->insert_id ?: $conn->query("SELECT id FROM scholarship_applications WHERE student_id = $user_id")->fetch_object()->id;
+
+            // Insert or update academic application details
+            $stmt = $conn->prepare("
+                INSERT INTO applications (scholarship_application_id, sschool, saward, sreceive)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                    sschool = VALUES(sschool), 
+                    saward = VALUES(saward), 
+                    sreceive = VALUES(sreceive)
+            ");
+            $stmt->bind_param("isss", $scholarship_application_id, $sschool, $saward, $sreceive);
+            $stmt->execute();
+
+            // Update uploaded files in acad_app
+            foreach ($uploaded_files as $column_name => $filepath) {
+                $stmt = $conn->prepare("UPDATE applications SET `{$column_name}` = ? WHERE scholarship_application_id = ?");
+                $stmt->bind_param("si", $filepath, $scholarship_application_id);
+                $stmt->execute();
             }
-            $familyCheckStmt->bind_param("i", $user_id);
-            $familyCheckStmt->execute();
-            $familyResult = $familyCheckStmt->get_result();
 
+            // Commit transaction
+            $conn->commit();
 
-            if ($familyResult->num_rows > 0) {
-                // Update family details if they already exist
-                $familyStmt = $conn->prepare("UPDATE family SET sffname = ?, sfaddress = ?, sfcontact = ?, sfoccu = ?, sfcompany = ?, smfname = ?, smaddress = ?, smcontact = ?, smoccu = ?, smcompany = ?, sgfname = ?, sgaddress = ?, sgcontact = ?, sgoccu = ?, sgcompany = ? WHERE student_id = ?");
-                $familyStmt->bind_param("sssssssssssssssi", $sffname, $sfaddress, $sfcontact, $sfoccu, $sfcompany, $smfname, $smaddress, $smcontact, $smoccu, $smcompany, $sgfname, $sgaddress, $sgcontact, $sgoccu, $sgcompany, $user_id);
-            } else {
-                // Insert family details if they don't exist
-                $familyStmt = $conn->prepare("INSERT INTO family (student_id, sffname, sfaddress, sfcontact, sfoccu, sfcompany, smfname, smaddress, smcontact, smoccu, smcompany, sgfname, sgaddress, sgcontact, sgoccu, sgcompany) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $familyStmt->bind_param("isssssssssssssss", $user_id, $sffname, $sfaddress, $sfcontact, $sfoccu, $sfcompany, $smfname, $smaddress, $smcontact, $smoccu, $smcompany, $sgfname, $sgaddress, $sgcontact, $sgoccu, $sgcompany);
+            echo "<script>alert('Form successfully submitted!');</script>";
+            echo "<script>window.location.href = 'index.php';</script>";
+
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            $conn->rollback();
+            $errors[] = "Database error: " . $e->getMessage();
+            foreach ($errors as $error) {
+                echo "<div class='alert alert-danger'>$error</div>";
             }
-
-            if ($familyStmt->execute()) {
-                echo "<script>alert('Form successfully submitted!');</script>";
-                echo "<script>window.location.href = 'index.php';</script>";
-            } else {
-                echo "Error updating family details: " . $familyStmt->error;
-            }
-            $familyStmt->close();
-            $familyCheckStmt->close();
-        } else {
-            echo "Error updating student details: " . $stmt->error;
         }
-    } else {
-        // Insert new student details if they don't exist
-        $stmt = $conn->prepare("INSERT INTO students (id, sfname, smname, slname, sfix, sdbirth, sgender, sctship, saddress, scontact, semail, scourse, syear, spcyincome, sschool, saward, sreceive, s_scholarship_type, s_account_status, applied_on) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("isssssssssssssssssss", $user_id, $sfname, $smname, $slname, $sfix, $sdbirth, $sgender, $sctship, $saddress, $scontact, $semail, $scourse, $syear, $spcyincome, $sschool, $saward, $sreceive, $s_scholarship_type, $s_account_status, $applied_on);
-
-        if ($stmt->execute()) {
-            // Insert family details
-            $familyStmt = $conn->prepare("INSERT INTO family (student_id, sffname, sfaddress, sfcontact, sfoccu, sfcompany, smfname, smaddress, smcontact, smoccu, smcompany, sgfname, sgaddress, sgcontact, sgoccu, sgcompany) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $familyStmt->bind_param("isssssssssssssss", $user_id, $sffname, $sfaddress, $sfcontact, $sfoccu, $sfcompany, $smfname, $smaddress, $smcontact, $smoccu, $smcompany, $sgfname, $sgaddress, $sgcontact, $sgoccu, $sgcompany);
-
-            if ($familyStmt->execute()) {
-                echo "<script>alert('Form successfully submitted!');</script>";
-                echo "<script>window.location.href = 'index.php';</script>";
-            } else {
-                echo "Error inserting family details: " . $familyStmt->error;
-            }
-            $familyStmt->close();
-            } else {
-                echo "Error inserting student details: " . $stmt->error;
-            }
-        }
-        $stmt->close();
-        $conn->close();
     } else {
         // Display errors
         foreach ($errors as $error) {
@@ -155,6 +167,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
-
-
 ?>

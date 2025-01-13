@@ -45,7 +45,7 @@ try {
     $scholarship_id = intval($_POST['scholarship_id']);
 
     // Prepare and execute query
-    $stmt = $conn->prepare("SELECT id, scholarship_name, status, type FROM scholarships WHERE id = ?");
+    $stmt = $conn->prepare("SELECT id, scholarship_name, status, type FROM scholarship_status WHERE id = ?");
     $stmt->bind_param("i", $scholarship_id);
     $stmt->execute();
     $result = $stmt->get_result();

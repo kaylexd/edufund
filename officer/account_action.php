@@ -43,47 +43,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST["action"])) {
             }
             break;
 
-        case 'edit_acad':
-            $studentId = $_POST["acad_hidden_id"];
-            
-            // Check for duplicate email
-            $check_stmt = $conn->prepare("SELECT id FROM students WHERE semail = ? AND id != ?");
-            if ($check_stmt) {
-                $check_stmt->bind_param("si", $_POST["semail"], $studentId);
-                $check_stmt->execute();
-                $result = $check_stmt->get_result();
-
-                if ($result->num_rows > 0) {
-                    echo json_encode(['error' => 'Email Address Already Exists']);
-                } else {
-                    // Update the student details
+            case 'edit_acad':
+                $studentId = $_POST["acad_hidden_id"];
+                
+                // Start transaction
+                $conn->begin_transaction();
+                try {
+                    // Update students table
                     $update_stmt = $conn->prepare("
                         UPDATE students 
-                        SET sid = ?, sfname = ?, slname = ?, semail = ?, account_status = ?
+                        SET sid = ?, sfname = ?, slname = ?, semail = ?
                         WHERE id = ?
                     ");
-
-                    if ($update_stmt) {
-                        $update_stmt->bind_param("sssssi", 
-                            $_POST["sid"], 
-                            $_POST["sfname"], 
-                            $_POST["slname"], 
-                            $_POST["semail"],
-                            $_POST["account_status"],
-                            $studentId
-                        );
-
-                        if ($update_stmt->execute()) {
-                            echo json_encode(['success' => 'Student Data Updated']);
-                        } else {
-                            echo json_encode(['error' => 'Error executing student update']);
-                        }
-                        $update_stmt->close();
-                    }
+                    $update_stmt->bind_param("ssssi", 
+                        $_POST["sid"], 
+                        $_POST["sfname"], 
+                        $_POST["slname"], 
+                        $_POST["semail"],
+                        $studentId
+                    );
+                    $update_stmt->execute();
+            
+                    // Update officer table for account_status
+                    $officer_stmt = $conn->prepare("
+                        UPDATE officer 
+                        SET account_status = ?
+                        WHERE student_id = ?
+                    ");
+                    $officer_stmt->bind_param("si", 
+                        $_POST["account_status"],
+                        $studentId
+                    );
+                    $officer_stmt->execute();
+            
+                    $conn->commit();
+                    echo json_encode(['success' => 'Student Data Updated']);
+            
+                } catch (Exception $e) {
+                    $conn->rollback();
+                    echo json_encode(['error' => $e->getMessage()]);
                 }
-                $check_stmt->close();
-            }
-            break;
+                break;
+            
 
         default:
             echo json_encode(['error' => 'Invalid action']);

@@ -19,7 +19,7 @@ if (empty($username) || empty($password)) {
 
 // Prepare and execute the query for the admin table
 if (empty($errors)) {
-    $stmt = $conn->prepare('SELECT id, password FROM admin WHERE username = ?');
+    $stmt = $conn->prepare('SELECT id, password FROM administrator WHERE username = ?');
     $stmt->bind_param('s', $username);
     $stmt->execute();
     $stmt->store_result();
@@ -50,15 +50,28 @@ if (empty($errors)) {
     } else {
         // If no admin found, check the student table
         $stmt->close();
-        $stmt = $conn->prepare('SELECT id, semail, s_pass, account_status, is_verified, sfname, slname FROM students WHERE semail = ?');
+        $stmt = $conn->prepare('
+            SELECT 
+                s.id,
+                s.semail, 
+                s.spass,
+                s.is_verified,
+                s.sfname,
+                s.slname,
+                o.account_status
+            FROM students s
+            LEFT JOIN officer o ON s.id = o.student_id
+            WHERE s.semail = ?
+        ');
+
         $stmt->bind_param('s', $username);
         $stmt->execute();
         $stmt->store_result();
-
+        
         if ($stmt->num_rows === 1) {
-            $stmt->bind_result($student_id, $semail, $hashedPassword, $account_status, $is_verified, $sfname, $slname);
+            $stmt->bind_result($student_id, $semail, $hashedPassword, $is_verified, $sfname, $slname, $account_status);
             $stmt->fetch();
-
+        
             // Check email verification first
             if ($is_verified == 0) {
                 $errors[] = "Please verify your email before logging in. Check your inbox for the verification email.";
@@ -66,9 +79,7 @@ if (empty($errors)) {
             // Then check account status
             elseif ($account_status === 'Inactive') {
                 $errors[] = "Your account is pending. Please wait for Approval.";
-            }
-
-            else {
+            } else {
                 // Account is active and verified, verify password
                 if (password_verify($password, $hashedPassword)) {
                     $_SESSION['user_id'] = $student_id;
@@ -85,9 +96,8 @@ if (empty($errors)) {
             $errors[] = "Invalid email or password.";
         }
     }
-
-    // Close the statement
-    $stmt->close();
+        // Close the statement
+        $stmt->close();
 }
 
 // Close the connection

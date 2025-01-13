@@ -32,7 +32,7 @@ function sendVerificationEmail($email, $token, $firstname, $lastname) {
         $mail->Subject = 'Email Verification for Your Account';
 
         // Verification link (adjust the URL to your actual domain)
-        $verification_link = "https://localhost/scholar/verify.php?token=" . $token;
+        $verification_link = "https://localhost/scholarship/verify.php?token=" . $token;
 
         $mail->Body = "
             <div style='font-family: Arial, sans-serif;'>
@@ -61,7 +61,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $firstname = $_POST['firstname'];
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // Hashing the password
-    $account_status = 'Inactive';
 
     // Initialize error array
     $errors = [];
@@ -82,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $stmt->close();
     }
-
+    
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $errors['email_format'] = "Invalid email format.";
@@ -139,11 +138,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $verification_token = generateVerificationToken();
 
     // Insert data into the database
-    $sql = "INSERT INTO students (sid, slname, sfname, semail, s_pass, simg, account_status, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)";
+    $sql = "INSERT INTO students (sid, slname, sfname, semail, spass, simg, verification_token, is_verified) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, 0)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssssss", $studentid, $lastname, $firstname, $email, $password, $imagePath, $account_status, $verification_token);
+    $stmt->bind_param("sssssss", $studentid, $lastname, $firstname, $email, $password, $imagePath, $verification_token);
 
     if ($stmt->execute()) {
+        $student_id = $stmt->insert_id;
+        
+        // Insert into officer table with default status
+        $officer_sql = "INSERT INTO officer (student_id, account_status) VALUES (?, 'Inactive')";
+        $officer_stmt = $conn->prepare($officer_sql);
+        $officer_stmt->bind_param("i", $student_id);
+        
+        
+
+        if ($officer_stmt->execute()) {
         // Try to send verification email
         try {
             $emailSent = sendVerificationEmail($email, $verification_token, $firstname, $lastname);
@@ -173,6 +183,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->close();
 }
-
+}
 $conn->close();
 ?>

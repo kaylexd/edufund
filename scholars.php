@@ -4,7 +4,12 @@ include('includes/navbar.php');
 include('includes/db.php');
 
 // Query for scholars only
-$sql = "SELECT id, sid, sfname, smname, slname, scourse, syear, scontact, semail, s_scholar_status, s_scholarship_type FROM students WHERE is_scholar = 1";
+$sql = "SELECT s.id, s.sid, s.sfname, s.smname, s.slname, s.scourse, s.syear, s.scontact, s.semail,
+        a.s_scholar_status, a.is_scholar, sa.s_scholarship_type
+        FROM students s
+        INNER JOIN admin_status a ON s.id = a.student_id
+        LEFT JOIN scholarship_applications sa ON s.id = sa.student_id 
+        WHERE a.is_scholar = 1";
 $result = $conn->query($sql);
 
 
@@ -17,27 +22,22 @@ if (!$result) {
 <!-- DataTables Example -->
 <div class="card shadow mb-4">
 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-<h6 class="m-0 font-weight-bold text-primary">Scholars</h6>
+<h6 class="m-0 font-weight-bold text-bg-gray">Scholars</h6>
     <div>
 	<div class="btn-group">
     <!-- Main Button -->
-    <button type="button" class="btn btn-info btn-sm add_button dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <button type="button" class="btn btn-primary btn-sm add_button dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fas fa-plus"></i>
     </button>
     <!-- Dropdown Menu -->
     <div class="dropdown-menu">
         <button class="dropdown-item" type="button" name="add_acad" id="add_acad">Academic</button>
         <button class="dropdown-item" type="button" name="add_nonacad" id="add_nonacad">Non-Academic</button>
-        <button class="dropdown-item" type="button" name="add_unifast" id="add_unifast">UNIFAST</button>
-        <button class="dropdown-item" type="button" name="add_ched" id="add_ched">CHED</button>
     </div>
 </div>
 
         <button type="button" class="btn btn-primary btn-sm email_button">
             <i class="fas fa-envelope"></i>
-        </button>
-		<button type="button" class="btn btn-success btn-sm announcement_button">
-            <i class="fas fa-bullhorn"></i>
         </button>
     </div>
 </div>
@@ -187,7 +187,7 @@ if (!$result) {
 									<span id="error_saddress" class="text-danger"></span>
 								</div>
 								<div class="col-xs-12 col-sm-12 col-md-5">
-									<label>Email Address<span class="text-danger">*</span></label>
+									<label>Email Address<span class="text-danger"></span></label>
 									<input type="text" name="semail" id="semail" class="form-control" required/>
 									<span id="error_semail" class="text-danger"></span>
 								</div>
@@ -706,7 +706,7 @@ if (!$result) {
 									<div class="card-body">
 										<div class="col-xs-12 col-sm-12 col-md-4 offset-md-4">
 											<label>Scholarship Status<span class="text-danger">*</span></label>
-											<select name="sn_scholar_stat" id="sn_scholar_stat" class="form-control" required>
+											<select name="s_scholar_status" id="s_scholar_status" class="form-control" required>
 											<option value="">-Select-</option>
 											<option value="Pending">Pending</option>
 											<option value="Approved">Approved</option>
@@ -809,14 +809,6 @@ if (!$result) {
             <div class="modal-body">
                 <form id="announcementForm">
                     <div class="form-group">
-                        <label>To:</label>
-                        <input type="text" class="form-control" id="student_id" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label>Subject:</label>
-                        <input type="text" class="form-control" id="announcement_subject" required>
-                    </div>
-                    <div class="form-group">
                         <label>Message:</label>
                         <div class="announcement-text-wrapper" style="max-height: 200px; overflow-y: auto;">
                             <textarea class="form-control" id="announcement_text" rows="4" style="resize: vertical; min-height: 100px; max-height: 100%;" required></textarea>
@@ -898,48 +890,35 @@ if (!$result) {
 				
 
 				// Announcement button click handler
-				$(document).on('click', '.announcement_button', function() {
-					var selected = [];
-					var selectedEmails = [];
-					
-					$('.select_row:checked').each(function() {
-						selected.push($(this).val());
-						selectedEmails.push($(this).closest('tr').find('td:eq(6)').text());
-					});
+$(document).on('click', '.announcement_button', function() {
+    $('#announcementModal').modal('show');
+});
 
-					if (selected.length === 0) {
-						alert('Please select at least one scholar.');
-						return;
-					}
+$('#send_announcement').click(function() {
+    var subject = $('#announcement_subject').val();
+    var announcement = $('#announcement_text').val();
+    
+    $.ajax({
+        url: 'scholars_action.php',
+        method: 'POST',
+        data: {
+            action: 'send_announcement_all',
+            subject: subject,
+            announcement: announcement
+        },
+        success: function(response) {
+            $('#announcementModal').modal('hide');
+            alert('Announcement sent successfully to all students!');
+            $('#announcement_subject').val('');
+            $('#announcement_text').val('');
+        },
+        error: function() {
+            alert('Failed to send announcement');
+        }
+    });
+});
 
-					$('#student_id').val(selectedEmails.join(', '));
-					$('#announcementModal').modal('show');
-				});
-				$('#send_announcement').click(function() {
-					var student_id = $('#student_id').val();
-					var subject = $('#announcement_subject').val();
-					var announcement = $('#announcement_text').val();
-					
-					$.ajax({
-						url: 'scholars_action.php',
-						method: 'POST',
-						data: {
-							action: 'send_announcement',
-							student_id: student_id,
-							subject: subject,
-							announcement: announcement
-						},
-						success: function(response) {
-							$('#announcementModal').modal('hide');
-							alert('Announcement sent successfully!');
-							$('#announcement_subject').val('');
-							$('#announcement_text').val('');
-						},
-						error: function() {
-							alert('Failed to send announcement');
-						}
-					});
-				});
+
 
 				$('.manage_slots_button').click(function() {
     // Fetch current slots data
@@ -1047,10 +1026,10 @@ $(document).on('click', '.view_button', function() {
                 var html = '<div class="table-responsive">';
                 html += '<table class="table">';
                 // Student ID Details
-                html += '<tr><th width="40%" class="text-left" style="font-size:20px">Student ID Details</th><td width="60%"></td></tr>';
+				html += '<tr style="background-color: crimson;"><th width="40%" class="text-left" style="font-size:20px; color: white">Student ID Details</th><td width="60%"></td></tr>';
                 html += '<tr><th width="40%" >Student ID No.</th><td width="60%">' + data.sid + '</td></tr>';
                 // Personal Details
-                html += '<tr><th width="40%" class="text-left" style="font-size:20px">Personal Details</th><td width="60%"></td></tr>';
+				html += '<tr style="background-color: crimson;"><th width="40%" class="text-left" style="font-size:20px; color: white">Personal Details</th><td width="60%"></td></tr>';
                 html += '<tr><th width="40%" >First Name</th><td width="60%">' + data.sfname + '</td></tr>';
                 html += '<tr><th width="40%" >Middle Name</th><td width="60%">' + data.smname + '</td></tr>';
                 html += '<tr><th width="40%" >Last Name</th><td width="60%">' + data.slname + '</td></tr>';
@@ -1065,7 +1044,7 @@ $(document).on('click', '.view_button', function() {
                 html += '<tr><th width="40%" >Current Year Level</th><td width="60%">' + data.syear + '</td></tr>';
                 // Family Details
                 // Guardian Details
-                html += '<tr><th width="40%" class="text-left" style="font-size:20px">Family Details</th><td width="60%"></td></tr>';
+                html += '<tr style="background-color: crimson;"><th width="40%" class="text-left" style="font-size:20px; color: white">Family Details</th><td width="60%"></td></tr>';
                 html += '<tr><th width="40%" class="text-left" style="font-size:18px">Guardian Details</th><td width="60%"></td></tr>';
                 html += '<tr><th width="40%" >First Name</th><td width="60%">' + data.sgfname + '</td></tr>';
                 html += '<tr><th width="40%" >Address</th><td width="60%">' + data.sgaddress + '</td></tr>';
@@ -1073,14 +1052,14 @@ $(document).on('click', '.view_button', function() {
                 html += '<tr><th width="40%" >Occupation/Position</th><td width="60%">' + data.sgoccu + '</td></tr>';
                 html += '<tr><th width="40%" >Company</th><td width="60%">' + data.sgcompany + '</td></tr>';
                 // Father Details
-                html += '<tr><th width="40%" class="text-left" style="font-size:18px">Father Details</th><td width="60%"></td></tr>';
+                html += '<tr style="background-color: crimson;"><th width="40%" class="text-left" style="font-size:20px; color: white">Father Details</th><td width="60%"></td></tr>';
                 html += '<tr><th width="40%" >First Name</th><td width="60%">' + data.sffname + '</td></tr>';
                 html += '<tr><th width="40%" >Address</th><td width="60%">' + data.sfaddress + '</td></tr>';
                 html += '<tr><th width="40%" >Contact Number</th><td width="60%">' + data.sfcontact + '</td></tr>';
                 html += '<tr><th width="40%" >Occupation/Position</th><td width="60%">' + data.sfoccu + '</td></tr>';
                 html += '<tr><th width="40%" >Company</th><td width="60%">' + data.sfcompany + '</td></tr>';
                 // Mother Details
-                html += '<tr><th width="40%" class="text-left" style="font-size:18px">Mother Details</th><td width="60%"></td></tr>';
+                html += '<tr style="background-color: crimson;"><th width="40%" class="text-left" style="font-size:20px; color: white">Mother Details</th><td width="60%"></td></tr>';
                 html += '<tr><th width="40%" >First Name</th><td width="60%">' + data.smfname + '</td></tr>';
                 html += '<tr><th width="40%" >Address</th><td width="60%">' + data.smaddress + '</td></tr>';
                 html += '<tr><th width="40%" >Contact Number</th><td width="60%">' + data.smcontact + '</td></tr>';
@@ -1088,12 +1067,12 @@ $(document).on('click', '.view_button', function() {
                 html += '<tr><th width="40%" >Company</th><td width="60%">' + data.smcompany + '</td></tr>';
 				html += '<tr><th width="40%" >Parents Combine Yearly Income</th><td width="60%">'+data.spcyincome+'</td></tr>';
                // Achievement Details
-				html += '<tr><th width="40%" class="text-left" style="font-size:20px">Achievement Details</th><td width="60%"></td></tr>';
+			   html += '<tr style="background-color: crimson;"><th width="40%" class="text-left" style="font-size:20px; color: white">Achievement Details</th><td width="60%"></td></tr>';
 				html += '<tr><th width="40%" >Name Of School/Institution/Company</th><td width="60%">'+data.sschool+'</td></tr>';
 				html += '<tr><th width="40%" >Award Received</th><td width="60%">'+data.saward+'</td></tr>';
 				html += '<tr><th width="40%" >Date Received</th><td width="60%">'+data.sreceive+'</td></tr>';
 				// Scholarship Details
-                html += '<tr><th width="40%" class="text-left" style="font-size:20px">Scholarship Details</th><td width="60%"></td></tr>';
+                html += '<tr style="background-color: crimson;"><th width="40%" class="text-left" style="font-size:20px; color: white">Scholarship Details</th><td width="60%"></td></tr>';
                 html += '<tr><th width="40%" >Scholarship Type</th><td width="60%">' + data.s_scholarship_type + '</td></tr>';
                	html += '<tr><th width="40%" >Scholarship Status</th><td width="60%">' + data.s_scholar_status + '</td></tr>';
                 html += '<tr><th width="40%" >Date Applied</th><td width="60%">' + data.applied_on + '</td></tr>';

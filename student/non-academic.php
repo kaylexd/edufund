@@ -73,12 +73,50 @@ $count = $result->fetch_assoc()['count'];
 <body id="page-top">
 
   <!-- Page Wrapper -->
+  <?php
+$announcement_query = "SELECT message FROM announcements ORDER BY created_at DESC LIMIT 1";
+$announcement_result = $conn->query($announcement_query);
+$announcement_text = "No announcement at the moment";
+if ($announcement_result->num_rows > 0) {
+    $announcement_text = $announcement_result->fetch_assoc()['message'];
+}
+?>
+
+<style>
+@keyframes scroll-left {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+.marquee-container {
+    overflow: hidden;
+    background-color: #f8f9fc;
+    padding: 8px 0;
+    width: 100%;
+}
+.marquee-text {
+    display: inline-block;
+    animation: scroll-left 25s linear infinite;
+    white-space: nowrap;
+}
+</style>
+
+<div class="marquee-container">
+    <div class="marquee-text">
+    <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+    </div>
+</div>
   <div id="wrapper">
 
 
   
    <!-- Sidebar -->
-   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+   <ul class="navbar-nav bg-gray-700 sidebar sidebar-dark accordion" id="accordionSidebar">
 
 
 
@@ -109,7 +147,7 @@ $count = $result->fetch_assoc()['count'];
 
 <li class="nav-item">
   <a class="nav-link" href="profile.php">
-  <i class="fa-solid fa-magnifying-glass"></i>
+  <i class="fa-solid fa-user"></i>
     <span>Profile</span></a>
 </li>
 
@@ -130,7 +168,7 @@ $count = $result->fetch_assoc()['count'];
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="navbar navbar-expand navbar-dark navbar-crimson topbar mb-4 static-top shadow">
 
        
 
@@ -141,17 +179,17 @@ $count = $result->fetch_assoc()['count'];
           <li class="nav-item dropdown no-arrow mx-1">
               <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fas fa-bell fa-fw"></i>
+                  <i class="fas fa-bell fa-fw text-white"></i>
                   <!-- Counter - Alerts -->
                   <span class="badge badge-danger badge-counter"><?php echo $count; ?></span>
               </a>
-</li>
+          </li>
             
 
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <span class="mr-2 d-none d-lg-inline text-white small">
                   
                 <?php echo htmlspecialchars($semail); ?> 
                   
@@ -301,7 +339,7 @@ $count = $result->fetch_assoc()['count'];
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-4 offset-md-4">
                       <label>Email Address<span class="text-danger">*</span></label>
-                      <input type="text" name="semail" id="semail"  class="form-control" />
+                      <input type="text" name="semail" id="semail"  class="form-control" readonly />
                       <span id="error_semail" class="text-danger"></span>
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-4">
@@ -534,20 +572,24 @@ $count = $result->fetch_assoc()['count'];
   </div>
 </div>
 
-<!-- Modal for Grades -->
-<div class="modal fade" id="gradesModal" tabindex="-1" role="dialog">
+
+
+
+
+<!-- Modal for Indigency -->
+<div class="modal fade" id="indigencyModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <div>
                     <h5 class="modal-title">Requirements</h5>
-                    <p class="requirement-name">Photocopy of Report Card / Grades</p>
+                    <p class="requirement-name">Certificate / Barangay Indigency</p>
                 </div>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <input type="file" class="form-control-file" name="grades_file" id="gradesFile" accept="image/*">
+                    <input type="file" class="form-control-file" name="cert_file" id="indigencyFile" accept="image/*">
                 </div>
             </div>
             <div class="modal-footer">
@@ -557,6 +599,7 @@ $count = $result->fetch_assoc()['count'];
         </div>
     </div>
 </div>
+
 
 <!-- Modal for Good Moral -->
 <div class="modal fade" id="moralModal" tabindex="-1" role="dialog">
@@ -582,20 +625,20 @@ $count = $result->fetch_assoc()['count'];
     </div>
 </div>
 
-<!-- Modal for Indigency -->
-<div class="modal fade" id="indigencyModal" tabindex="-1" role="dialog">
+<!-- Modal for Grades -->
+<div class="modal fade" id="gradesModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <div>
                     <h5 class="modal-title">Requirements</h5>
-                    <p class="requirement-name">Certificate / Barangay Indigency</p>
+                    <p class="requirement-name">Photocopy of Report Card / Grades</p>
                 </div>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <input type="file" class="form-control-file" name="indigency_file" id="indigencyFile" accept="image/*">
+                    <input type="file" class="form-control-file" name="grades_file" id="gradesFile" accept="image/*">
                 </div>
             </div>
             <div class="modal-footer">
@@ -619,7 +662,7 @@ $count = $result->fetch_assoc()['count'];
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <input type="file" class="form-control-file" name="medical_file" id="medicalFile" accept="image/*">
+                    <input type="file" class="form-control-file" name="grad_file" id="medicalFile" accept="image/*">
                 </div>
             </div>
             <div class="modal-footer">
@@ -634,13 +677,13 @@ $count = $result->fetch_assoc()['count'];
                     <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
                     <label class="form-check-label" for="flexCheckDefault" style="font-style: italic; font-weight: normal;">
-                      I agree that the requirements above are legit and will submit it on time.
+                      I certify that the entries above are true and correct to the best of my knowledge. I hereby authorize St. Cecilias Coolege - Cebu INC. to verify such entries.
                     </label>
                     </div>
                     <span id="error_flexCheckDefault" class="text-danger"></span>
                   </div>
                   <div class="form-group">
-                    <div class="alert alert-warning" role="alert" style="font-style: italic;"><b>Note:</b> Please provide the hard copy of the following requirements, bring it to the Scholarship Office.</div>
+                    <div class="alert alert-warning" role="alert" style="font-style: italic;"><b>Note:</b> Please wait for announcements and provide the hard copy of the following requirements.</div>
                   </div>  
                   <div class="form-group text-center">
                     <button type="button" name="previous_btn_requirement" id="previous_btn_requirement" class="btn btn-primary btn-md">Previous</button>

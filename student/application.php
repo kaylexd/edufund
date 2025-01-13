@@ -17,6 +17,18 @@ $stmt->execute();
 $result = $stmt->get_result();  
 $row = $result->fetch_assoc();  
 $stmt->close();
+$semail = isset($row['semail']) ? $row['semail'] : '';
+
+
+
+$sql = "SELECT COUNT(*) as count FROM announcements WHERE student_id = ? AND is_read = 0";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$count = $result->fetch_assoc()['count'];
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -61,12 +73,50 @@ $stmt->close();
 <body id="page-top">
 
   <!-- Page Wrapper -->
+  <?php
+$announcement_query = "SELECT message FROM announcements ORDER BY created_at DESC LIMIT 1";
+$announcement_result = $conn->query($announcement_query);
+$announcement_text = "No announcement at the moment";
+if ($announcement_result->num_rows > 0) {
+    $announcement_text = $announcement_result->fetch_assoc()['message'];
+}
+?>
+
+<style>
+@keyframes scroll-left {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+.marquee-container {
+    overflow: hidden;
+    background-color: #f8f9fc;
+    padding: 8px 0;
+    width: 100%;
+}
+.marquee-text {
+    display: inline-block;
+    animation: scroll-left 25s linear infinite;
+    white-space: nowrap;
+}
+</style>
+
+<div class="marquee-container">
+    <div class="marquee-text">
+    <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: red;"><?php echo htmlspecialchars($announcement_text); ?></span>
+    </div>
+</div>
   <div id="wrapper">
 
 
   
    <!-- Sidebar -->
-   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+   <ul class="navbar-nav bg-gray-700 sidebar sidebar-dark accordion" id="accordionSidebar">
 
 
 
@@ -97,9 +147,10 @@ $stmt->close();
 
 <li class="nav-item">
   <a class="nav-link" href="profile.php">
-  <i class="fa-solid fa-magnifying-glass"></i>
+  <i class="fa-solid fa-user"></i>
     <span>Profile</span></a>
 </li>
+
 <!-- Heading 
 <div class="sidebar-heading">
   Interface
@@ -117,27 +168,33 @@ $stmt->close();
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+        <nav class="navbar navbar-expand navbar-dark navbar-crimson topbar mb-4 static-top shadow">
 
-        
+       
 
           
 
           <!-- Topbar Navbar -->
           <ul class="navbar-nav ml-auto">
-
-            
+          <li class="nav-item dropdown no-arrow mx-1">
+              <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fas fa-bell fa-fw text-white"></i>
+                  <!-- Counter - Alerts -->
+                  <span class="badge badge-danger badge-counter"><?php echo $count; ?></span>
+              </a>
+          </li>
             
 
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                <span class="mr-2 d-none d-lg-inline text-white small">
                   
-               Student
+                <?php echo htmlspecialchars($semail); ?> 
                   
                 </span>
-                <img class="img-profile rounded-circle" src="../img/undraw_profile_1.svg">
+                <img class="img-profile rounded-circle" src="../img/user-solid.svg">
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
@@ -194,10 +251,11 @@ $stmt->close();
 
        <!-- Header -->
        <form method="POST" action="application_action.php" enctype="multipart/form-data"> <!-- Add enctype here -->
-       <input type="hidden" name="cert_image_data" id="cert_image_data">
+       <input type="hidden" name="grades_image_data" id="grades_image_data">
       <input type="hidden" name="moral_image_data" id="moral_image_data">
-      <input type="hidden" name="grades_image_data" id="grades_image_data">
-      <input type="hidden" name="grad_image_data" id="grad_image_data">
+      <input type="hidden" name="indigency_image_data" id="indigency_image_data">
+      <input type="hidden" name="medical_image_data" id="medical_image_data">
+
                                                       
        <div class="row justify-content-center"><div class="col-md-10">
         <h1 class="h3 mb-4 text-gray-800">Academic Scholarship (AS)<br>Application Form</h1>
@@ -210,7 +268,7 @@ $stmt->close();
               <a class="nav-link inactive_tab1" id="list_family_details" style="border:1px solid #ccc">Family Details</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link inactive_tab1" id="list_achievement_details" style="border:1px solid #ccc">Achievements Details</a>
+              <a class="nav-link inactive_tab1" id="list_achievement_details" style="border:1px solid #ccc">Application Details</a>
             </li>
             <li class="nav-item">
               <a class="nav-link inactive_tab1" id="list_require_details" style="border:1px solid #ccc">Requirements Details</a>
@@ -281,7 +339,7 @@ $stmt->close();
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-4 offset-md-4">
                       <label>Email Address<span class="text-danger">*</span></label>
-                      <input type="text" name="semail" id="semail"  class="form-control" />
+                      <input type="text" name="semail" id="semail"  class="form-control" readonly/>
                       <span id="error_semail" class="text-danger"></span>
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-4">
@@ -424,7 +482,7 @@ $stmt->close();
         </div>
       </div>
     <!-- Achievements Details -->
-      <div class="tab-pane" id="achievement_details">
+    <div class="tab-pane" id="achievement_details">
         <div class="card">
         <div class="card-header" style="font-weight: bold; font-size: 16px;">SUMMARY OF AWARD RECEIVE</div>
         <div class="card-body">
@@ -455,7 +513,7 @@ $stmt->close();
         </div>
       </div>
     <!-- Requirement Details -->
-        <div class="tab-pane" id="require_details">
+    <div class="tab-pane" id="require_details">
             <div class="card">
               <div class="card-header" style="font-weight: bold; font-size: 16px;">Applicant Must Be:</div>
                 <div class="card-body">
@@ -607,13 +665,13 @@ $stmt->close();
                     <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
                     <label class="form-check-label" for="flexCheckDefault" style="font-style: italic; font-weight: normal;">
-                      I agree that the requirements above are legit and will submit it on time.
+                      I certify that the entries above are true and correct to the best of my knowledge. I hereby authorize St. Cecilias Coolege - Cebu INC. to verify such entries.
                     </label>
                     </div>
                     <span id="error_flexCheckDefault" class="text-danger"></span>
                   </div>
                   <div class="form-group">
-                    <div class="alert alert-warning" role="alert" style="font-style: italic;"><b>Note:</b> Please provide the hard copy of the following requirements, bring it to the Scholarship Office.</div>
+                    <div class="alert alert-warning" role="alert" style="font-style: italic;"><b>Note:</b> Please wait for announcements and provide the hard copy of the following requirements.</div>
                   </div>  
                   <div class="form-group text-center">
                     <button type="button" name="previous_btn_requirement" id="previous_btn_requirement" class="btn btn-primary btn-md">Previous</button>
@@ -694,7 +752,6 @@ $('input[type="file"]').change(function(e) {
     var error_semail = '';
     var error_scourse = '';
     var error_syear = '';
-    var error_sgender = '';
     var pcnumval = /^[0-9]{10,15}$/;
     var emailPattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
     
@@ -866,7 +923,7 @@ $('input[type="file"]').change(function(e) {
       || error_sdbirth != '' || error_sctship != '' 
       || error_saddress != '' || error_scontact != ''
       || error_semail != '' || error_scourse != ''
-      || error_syear != '' || error_sgender != ''
+      || error_syear != ''
       )
       {
       return false;
@@ -1421,7 +1478,7 @@ $('input[type="file"]').change(function(e) {
  </div>
       
 
-
+ 
  
 
 
