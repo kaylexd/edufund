@@ -30,7 +30,7 @@ npm install
    \- Create a new MySQL database.  
    \- Import the provided SQL file to set up the database schema:  
       
-mysql \-u username \-p database\_name \< database/schema.sql
+mysql \-u username \-p database\_name \< database/scholarship.sql
 
 5\. Configure the Environment  
    \- Copy the .env.example file to .env and update the database credentials.
@@ -61,10 +61,5 @@ We welcome contributions from the community. To contribute:
 
 Please adhere to the project's coding standards and guidelines.
 
-License
-
-This project is licensed under the MIT License. See the \[LICENSE\](LICENSE) file for details.
-
-\---
 
 For any questions or further information, please contact ONLINE SCHOLARSHIP SYSTEM(mailto:datadynamo@gmail.com)."# scholarship" 
